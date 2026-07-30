@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>星衍 LifeVerse · 人生轨迹推演空间</title>
+  <style>
+:root {
+  --bg: #f7f8fc;
+  --panel: #ffffff;
+  --ink: #1a1d2e;
+  --muted: #6b7280;
+  --line: #e7e9f2;
+  --accent: #4f46e5;
+  --accent-light: #eef0ff;
+  --family: #d97706;
+  --work: #0ea5e9;
+  --cohort: #94a3b8;
+  --echo: #e11d48;
+  --radius: 14px;
+  --shadow: 0 8px 30px rgba(31, 38, 95, 0.08);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  overflow: hidden;
+}
+#bgStarNet {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* ===== 顶栏 ===== */
+.topbar {
+  position: relative; z-index: 3;
+  height: 58px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-mark { color: var(--accent); font-size: 20px; }
+.brand-name { font-weight: 800; font-size: 19px; letter-spacing: .5px; }
+.brand-name em { font-style: normal; color: var(--accent); font-weight: 700; }
+.brand-tag { color: var(--muted); font-size: 12px; }
+.icon-btn {
+  border: 1px solid var(--line); background: #fff; border-radius: 10px;
+  width: 38px; height: 34px; cursor: pointer; font-size: 16px;
+}
+.icon-btn:hover { border-color: var(--accent); }
+
+/* ===== 布局 ===== */
+.layout { position: relative; z-index: 2; display: flex; height: calc(100vh - 58px); }
+.sidenav {
+  width: 220px; flex-shrink: 0; padding: 18px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  text-align: left; padding: 11px 14px;
+  border: 1px solid transparent; border-radius: 10px;
+  background: transparent; color: var(--ink); cursor: pointer;
+  font-size: 14px; font-weight: 600; transition: .15s;
+}
+.nav-item:hover { background: #fff; }
+.nav-item.active { background: var(--panel); border-color: var(--line); box-shadow: var(--shadow); color: var(--accent); }
+.nav-idx {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  background: var(--accent-light); border-radius: 6px; padding: 2px 6px;
+}
+.nav-item.active .nav-idx { color: var(--accent); }
+
+.stage { flex: 1; overflow-y: auto; padding: 24px 30px 40px; min-height: 0; }
+
+/* ===== 通用 ===== */
+.mod-canvas { width: 100%; display: block; background: linear-gradient(180deg, #fbfbff, #f2f3fb); border: 1px solid var(--line); border-radius: var(--radius); }
+.muted { color: var(--muted); font-size: 13px; }
+.hint { color: var(--muted); font-size: 13px; margin: 10px 0; line-height: 1.6; }
+.btn {
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.05); }
+
+.module-head { margin-bottom: 18px; }
+.module-head h1 { font-size: 24px; margin: 0 0 6px; }
+.module-head p { color: var(--muted); margin: 0; font-size: 14px; }
+
+/* ===== 模块1 星云 ===== */
+.nebula-stage { width: 100%; display: flex; flex-direction: column; gap: 16px; min-height: 100%; }
+.nebula-canvas-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); flex: 1 1 auto; min-height: 340px; }
+.meter { height: 8px; background: var(--line); border-radius: 6px; overflow: hidden; margin-top: 14px; }
+.meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--work)); transition: width .4s; }
+.meter-cap { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.grav-row { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+.grav-chip {
+  border: 1px dashed var(--family); color: var(--family);
+  padding: 9px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;
+  background: #fffdf7; transition: .15s;
+}
+.grav-chip:hover { background: #fff7e9; }
+.grav-chip.done { border-style: solid; background: #ecfdf5; color: #059669; border-color: #059669; }
+
+/* ===== 模块2/7/8 星图 ===== */
+.starmap-stage { width: 100%; display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+.starmap-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.starmap-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+.dynasty-tab {
+  border: 1px solid var(--line); background: #fff; border-radius: 9px;
+  padding: 8px 13px; cursor: pointer; font-size: 13px; font-weight: 600;
+}
+.dynasty-tab:hover { border-color: var(--accent); }
+.dynasty-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+.starmap-canvas-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; touch-action: none; flex: 1 1 auto; min-height: 360px; }
+/* 关系编辑 / 视图切换 按钮 */
+.dyn-btn { border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 8px 13px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.dyn-btn:hover { border-color: var(--accent); }
+.dyn-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.view-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.view-opt { border: none; background: #fff; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); }
+.view-opt.active { background: var(--accent); color: #fff; }
+/* 扇形决策菜单 */
+.fan-menu { position: absolute; inset: 0; display: none; pointer-events: none; z-index: 5; }
+.fan-item {
+  position: absolute; transform: translate(-50%, -50%); pointer-events: auto;
+  border: 1px solid var(--accent); background: #fff; color: var(--accent);
+  padding: 7px 12px; border-radius: 18px; cursor: pointer; font-size: 13px; font-weight: 700;
+  box-shadow: var(--shadow); white-space: nowrap; transition: .12s;
+}
+.fan-item:hover { background: var(--accent); color: #fff; transform: translate(-50%, -50%) scale(1.08); }
+/* 阻尼滑条 */
+.damp-box { position: absolute; transform: translate(-50%, -50%); display: none; z-index: 6;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow); width: 150px; }
+.damp-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.damp-range { width: 100%; }
+.damp-val { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.damp-close { position: absolute; top: 4px; right: 6px; border: none; background: transparent; cursor: pointer; color: var(--muted); font-size: 13px; }
+.ripple-log {
+  margin-top: 14px; max-height: 220px; overflow-y: auto;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+}
+.rl-item { padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+.rl-item:last-child { border-bottom: none; }
+.rl-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; margin-right: 8px; font-weight: 700; }
+.rl-friction { color: var(--echo); font-weight: 700; }
+
+/* ===== 模块3 双生 ===== */
+.twin-stage { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; width: 100%; min-height: 100%; align-items: stretch; }
+.twin-canvas-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); min-height: 420px; }
+.reso-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.reso-pill {
+  border: 1px solid var(--line); background: #fff; border-radius: 18px;
+  padding: 7px 13px; cursor: pointer; font-size: 12px; font-weight: 600;
+}
+.reso-pill.active { background: #fff7e9; border-color: var(--family); color: var(--family); }
+.vec-matrix { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.vec-matrix h4 { margin: 0 0 4px; }
+.mx-slider-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 13px; }
+.mx-slider-row label { width: 130px; color: var(--muted); flex-shrink: 0; }
+.mx-slider { flex: 1; }
+.matrix { margin-top: 14px; border-top: 1px solid var(--line); }
+.matrix-row { display: flex; justify-content: space-between; padding: 10px 2px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+.mx-name { font-weight: 600; }
+.mx-val { color: var(--accent); font-weight: 700; }
+
+/* ===== 模块4 退休 ===== */
+.retire-stage { display: grid; grid-template-columns: 320px 1fr; gap: 24px; width: 100%; min-height: 100%; align-items: start; }
+.retire-form { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); height: fit-content; }
+.retire-form label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 5px; }
+.retire-form input, .retire-form select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px; }
+.flex-row { display: flex; align-items: center; gap: 10px; }
+.flex-row input[type=range] { flex: 1; }
+#rt_calc { width: 100%; margin-top: 16px; }
+.retire-result .clock-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+.clock-big { font-size: 30px; font-weight: 800; color: var(--accent); }
+.age-text { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.clock-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.clock-grid > div { background: var(--bg); border-radius: 10px; padding: 12px; }
+.clock-grid .k { display: block; font-size: 12px; color: var(--muted); }
+.clock-grid span:not(.k) { font-size: 18px; font-weight: 700; }
+.insight { margin-top: 16px; background: var(--accent-light); border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.7; }
+
+/* ===== 模块5 探针 ===== */
+.probe-stage { width: 100%; display: flex; flex-direction: column; gap: 16px; min-height: 100%; }
+.probe-canvas-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); flex: 1 1 auto; min-height: 320px; }
+/* 光阴探针轨道（可拖手柄） */
+.probe-track { position: relative; height: 30px; margin-top: 18px; border-radius: 16px;
+  background: linear-gradient(90deg, #eef0ff, #e0f2fe); border: 1px solid var(--line); touch-action: none; cursor: pointer; }
+.probe-track-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); border-radius: 16px 0 0 16px; background: rgba(79,70,229,0.18); }
+.probe-head { position: absolute; left: var(--p, 0%); top: 50%; transform: translate(-50%, -50%);
+  width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  cursor: grab; box-shadow: 0 2px 8px rgba(79,70,229,0.4); user-select: none; }
+.probe-head:active { cursor: grabbing; }
+.probe-controls { margin-top: 14px; }
+.probe-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.probe-year { color: var(--accent); font-weight: 700; }
+.probe-slider { width: 100%; }
+#btnSplit { margin-top: 12px; }
+.split-wrap { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.split-panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+.split-panel h4 { margin: 0 0 6px; }
+
+/* ===== 模块6 报告 ===== */
+.report-stage { width: 100%; display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+.report-head h2 { margin: 0 0 4px; }
+.report-sec { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-top: 16px; box-shadow: var(--shadow); }
+.report-sec h3 { margin: 0 0 12px; font-size: 16px; color: var(--accent); }
+.report-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.rc-card { background: var(--bg); border-radius: 10px; padding: 12px 14px; }
+.rc-k { font-size: 12px; color: var(--muted); }
+.rc-v { font-size: 15px; font-weight: 700; margin-top: 3px; }
+.report-list { margin: 8px 0; padding-left: 18px; line-height: 1.9; font-size: 14px; }
+.report-foot { text-align: center; color: var(--muted); margin-top: 26px; font-size: 13px; }
+
+/* ===== 顶部叙事提示条（L1 · 三.3 动态叙事） ===== */
+.narrative-bar {
+  position: relative; z-index: 2; height: 38px; display: flex; align-items: center; gap: 10px;
+  padding: 0 22px; background: linear-gradient(90deg, #eef0ff, #e0f2fe);
+  border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink);
+}
+.nar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; box-shadow: 0 0 0 4px rgba(79,70,229,0.15); animation: narr 1.6s infinite; }
+@keyframes narr { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+#narrativeText { line-height: 1.4; }
+
+/* ===== 分层音效面板 ===== */
+.audio-panel {
+  position: absolute; top: 46px; right: 12px; z-index: 20;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+  box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 7px; width: 160px;
+}
+.audio-panel .ap-title { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+.audio-panel label { font-size: 13px; display: flex; align-items: center; gap: 7px; cursor: pointer; }
+
+/* ===== 语音提示气泡 ===== */
+.voice-tip {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 40;
+  background: rgba(26,29,46,0.92); color: #fff; padding: 9px 16px; border-radius: 20px;
+  font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+.icon-btn.rec { background: var(--echo); color: #fff; border-color: var(--echo); animation: recp 1s infinite; }
+@keyframes recp { 0%,100% { box-shadow: 0 0 0 0 rgba(225,29,72,0.5); } 50% { box-shadow: 0 0 0 6px rgba(225,29,72,0); } }
+
+/* ===== 模块2/7/8 星体状态色标（L1 · 三.3） ===== */
+.legend .st-core { background: #4f46e5; }
+.legend .st-inf { background: #0ea5e9; }
+.legend .st-pot { background: #d97706; }
+.legend .st-conf { background: #e11d48; }
+
+/* ===== 模块3 双生分屏分割线（L1 · 二.3） ===== */
+.twin-canvas-wrap { position: relative; }
+.twin-divider {
+  position: absolute; top: 8px; bottom: 8px; width: 4px; transform: translateX(-50%);
+  background: rgba(120,120,140,0.35); border-radius: 4px; cursor: ew-resize; z-index: 4;
+}
+.twin-divider::after { content: '⇆'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; background: var(--accent); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+/* ===== 模块4 退休可拖磁块（L1 · 四.2） ===== */
+.retire-magnet { margin-top: 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+.retire-magnet h4 { margin: 0 0 10px; font-size: 14px; }
+.mag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.mag-block {
+  border: 1px solid var(--accent); background: var(--accent-light); color: var(--accent);
+  padding: 8px 13px; border-radius: 16px; cursor: grab; font-size: 13px; font-weight: 700; user-select: none;
+}
+.mag-block:active { cursor: grabbing; }
+.mag-block.pay { border-color: var(--work); background: #e0f2fe; color: var(--work); }
+.drop-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.drop-slot {
+  border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center;
+  font-size: 13px; color: var(--muted); background: var(--bg); transition: .15s;
+}
+.drop-slot.over { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+/* ===== 模块6 报告联动跳转 + 维度筛选（L1 · 六） ===== */
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+.filter-chip {
+  border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 6px 13px;
+  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--muted);
+}
+.filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.report-sec.dim { opacity: .45; }
+.rl-item.clickable { cursor: pointer; }
+.rl-item.clickable:hover { background: var(--accent-light); }
+.jump-btn { margin-top: 10px; }
+
+/* ===== 全局 HUD（顶栏探针年 + 完整度环 + 侧栏状态点） ===== */
+.hud-badge { margin-left: 12px; display: inline-flex; align-items: center; gap: 8px; }
+.hud-year { font-size: 12px; color: var(--muted); background: var(--accent-light); border-radius: 10px; padding: 3px 9px; }
+.hud-ring { font-size: 12px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 50%; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; }
+.nav-item { position: relative; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0; background: var(--line); }
+.nav-dot.ok { background: #059669; }
+.nav-dot.conf { background: var(--echo); box-shadow: 0 0 0 3px rgba(225,29,72,0.18); }
+.narrative-bar.echo { border-bottom: 2px solid var(--echo); }
+.narrative-bar.echo #narrativeText { color: var(--echo); }
+
+/* ===== 星图扇形情境卡 ===== */
+.fan-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 96px; padding: 8px 12px; }
+.fan-item .fi-main { font-weight: 700; }
+.fan-item .fi-sub { font-size: 10px; font-weight: 500; opacity: .85; white-space: nowrap; }
+.fan-item.fan-locked { border-color: var(--line); color: var(--muted); background: #f4f5f9; }
+
+/* ===== 涟漪日志故事句 ===== */
+.rl-story { line-height: 1.7; }
+
+/* ===== 探针事件钉 ===== */
+.probe-pins { position: absolute; inset: 0; pointer-events: none; }
+.probe-pin { position: absolute; top: -3px; width: 2px; height: 36px; transform: translateX(-50%); pointer-events: auto; cursor: pointer; border-radius: 2px; }
+.probe-pin.pin-dec { background: var(--accent); }
+.probe-pin.pin-retire { background: var(--family); }
+.probe-pin.pin-policy { background: var(--muted); height: 22px; top: 4px; opacity: .7; }
+
+/* ===== 星云可编辑芯片 / 隐藏维度 / 命运种子 ===== */
+.chip-pop { position: absolute; left: 24px; top: 120px; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; width: 190px; }
+.chip-pop .pop-title { font-size: 12px; font-weight: 700; color: var(--muted); }
+.chip-pop .pop-opt { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 8px; cursor: pointer; font-size: 13px; }
+.chip-pop .pop-opt:hover { border-color: var(--accent); }
+.hidden-chip { border-style: dotted; opacity: .8; }
+.hidden-row { margin-top: 4px; }
+.fear-input { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; margin-top: 6px; }
+.redo-row { display: flex; gap: 10px; margin-top: 10px; }
+.redo-row .btn { font-size: 13px; }
+
+/* ===== 报告编年体 + 十年信 + 导出仪式 ===== */
+.chrono-list { list-style: none; padding: 0; margin: 6px 0; }
+.chrono-item { display: flex; align-items: center; gap: 12px; padding: 9px 4px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+.chrono-item.hidden-out { opacity: .35; text-decoration: line-through; }
+.ch-year { font-weight: 800; color: var(--accent); width: 52px; flex-shrink: 0; }
+.ch-evt { flex: 1; }
+.ch-reach { color: var(--muted); font-size: 12px; }
+.ch-flag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(225,29,72,0.10); color: var(--echo); }
+.ch-flag.ok { background: rgba(5,150,105,0.12); color: #059669; }
+.ch-hide { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; }
+.letter-ta { width: 100%; min-height: 84px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; font-family: inherit; line-height: 1.6; resize: vertical; }
+.export-seal { display: none; align-items: center; gap: 12px; margin-top: 12px; padding: 14px 18px; background: linear-gradient(90deg,#eef0ff,#fae8f1); border-radius: 12px; }
+.export-seal .seal-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); animation: sealp 1s infinite; }
+.export-seal .seal-txt { font-size: 13px; font-weight: 600; color: var(--accent); }
+@keyframes sealp { 0%,100% { transform: scale(1); opacity:1 } 50% { transform: scale(1.5); opacity:.5 } }
+
+/* ===== 双生竹简卷轴 ===== */
+.twin-scroll { position: absolute; left: 16px; right: 16px; bottom: 56px; z-index: 3; background: rgba(255,255,255,0.96); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 12px 16px; transform: translateY(140%); transition: transform .5s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+.twin-scroll.show { transform: translateY(0); }
+.scroll-inner .scroll-head { font-size: 13px; font-weight: 800; color: var(--family); margin-bottom: 6px; }
+.scroll-line { font-size: 13px; line-height: 1.7; color: var(--ink); margin: 4px 0; }
+.scroll-line .homo { color: var(--family); font-weight: 700; border-bottom: 2px solid rgba(217,119,6,0.4); }
+
+/* ===== 双生画布内叠加层（提示 / 共振药丸） ===== */
+.twin-canvas-wrap > .hint { position: absolute; left: 16px; top: 14px; right: 16px; margin: 0; max-width: 62%; z-index: 2; }
+.twin-canvas-wrap > .reso-pills { position: absolute; left: 16px; bottom: 16px; right: 16px; margin: 0; z-index: 2; }
+
+/* ===== 模块4 退休时钟表盘 + 仪表 ===== */
+.retire-result { display: flex; flex-direction: column; gap: 18px; }
+.clock-dial { width: 100%; max-width: 380px; margin: 0 auto; }
+.clock-dial svg { width: 100%; height: auto; display: block; }
+.gauge-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.gauge { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); text-align: center; }
+.gauge svg { width: 100%; max-width: 160px; height: auto; }
+.gauge .g-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+.gauge .g-cap { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.clock-note { background: var(--accent-light); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.7; }
+.clock-note summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.clock-note[open] summary { margin-bottom: 8px; }
+
+/* ===== 模块6 报告可视化 ===== */
+.rv-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.rv-svg { width: 100%; height: auto; display: block; }
+.rv-cap { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
+.rv-radar { max-width: 320px; margin: 0 auto; }
+.rv-ripple { background: linear-gradient(180deg,#fbfbff,#f2f3fb); border:1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+.rv-ripple:hover { border-color: var(--accent); }
+.twin-bars { display: flex; flex-direction: column; gap: 10px; }
+.tb-row { display: grid; grid-template-columns: 150px 1fr 52px; align-items: center; gap: 10px; font-size: 13px; }
+.tb-track { height: 14px; background: var(--line); border-radius: 8px; overflow: hidden; }
+.tb-fill { height: 100%; background: linear-gradient(90deg,var(--accent),var(--work)); border-radius: 8px; transition: width .5s; }
+.tb-val { text-align: right; font-weight: 700; color: var(--accent); }
+
+@media (max-width: 860px) {
+  .twin-stage, .retire-stage { grid-template-columns: 1fr; }
+  .sidenav { width: 64px; }
+  .nav-item { font-size: 0; }
+  .nav-item .nav-idx { font-size: 12px; }
+  .layout { height: calc(100vh - 96px); }
+}
+.layout { height: calc(100vh - 96px); }
+
+</style>
+</head>
+<body>
+  <canvas id="bgStarNet"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">星衍 <em>LifeVerse</em></span>
+      <span class="brand-tag">人生轨迹推演空间 · PRD v2.2 · 丰富化</span>
+      <span class="hud-badge" id="hudBadge">
+        <span class="hud-year" id="hudYear">探针 2026</span>
+        <span class="hud-ring" id="hudRing" title="人生完整度">0%</span>
+      </span>
+    </div>
+    <div class="topbar-right">
+      <button id="micBtn" class="icon-btn" title="语音指令（说：涟漪 / 宇宙 / 退休 / 重置 / 分屏）">🎙️</button>
+      <button id="soundToggle" class="icon-btn" title="音效设置">🔊</button>
+      <div id="audioPanel" class="audio-panel" style="display:none">
+        <div class="ap-title">音效通道</div>
+        <label><input type="checkbox" id="ch_mute"> 全部静音</label>
+        <label><input type="checkbox" id="ch_nebula" checked> 星云坍缩</label>
+        <label><input type="checkbox" id="ch_gravity" checked> 引力拉扯</label>
+        <label><input type="checkbox" id="ch_ripple" checked> 涟漪 / 撕裂</label>
+        <label><input type="checkbox" id="ch_resonance" checked> 跨时空共振</label>
+      </div>
+    </div>
+  </header>
+
+  <div id="narrativeBar" class="narrative-bar">
+    <span class="nar-dot"></span>
+    <span id="narrativeText">欢迎来到星衍 LifeVerse · 拖拽星体、滑动探针，用「手势」而非按钮推演你的人生。</span>
+  </div>
+
+  <div class="layout">
+    <nav id="nav" class="sidenav"></nav>
+    <main id="stage" class="stage"></main>
+  </div>
+
+  <div id="voiceTip" class="voice-tip" style="display:none"></div>
+
+  <script>
+(function(){
+var __mods = {};
+var __cache = {};
+function __lx_req(key){
+  if (__cache[key]) return __cache[key];
+  var factory = __mods[key];
+  if (!factory) throw new Error('Missing module: ' + key);
+  var __lx_exp = {};
+  __cache[key] = __lx_exp;
+  factory(__lx_req, __lx_exp);
+  return __lx_exp;
+}
+__mods["js/engines/audio.js"] = function(__lx_req, __lx_exp){
+// 引擎：Web Audio 分层音效（视听规范 v2.1 升级 · L1 交互增强）
+// 分层通道：星云坍缩 / 引力拉扯 / 涟漪·撕裂 / 跨时空共振，可独立开关
+const KEY = 'xingyan_sound_mute';
+
+class SoundEngine {
+  constructor() {
+    this.muted = false;
+    try { this.muted = localStorage.getItem(KEY) === 'off'; } catch (e) {}
+    this.ctx = null;
+    // 四个可独立控制的音效通道（规格「三.2 分层音效」）
+    this.channels = { nebula: true, gravity: true, ripple: true, resonance: true };
+  }
+  _ac() {
+    try {
+      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {}
+    return this.ctx;
+  }
+  // 通用发声：freq 频率、dur 时长、type 波形、gain 增益、sweepTo 频率扫频
+  tone(freq, dur, type, gain, sweepTo) {
+    if (this.muted) return;
+    const c = this._ac();
+    if (!c) return;
+    try {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      if (sweepTo) o.frequency.exponentialRampToValueAtTime(sweepTo, c.currentTime + dur);
+      g.gain.value = gain || 0.04;
+      o.connect(g); g.connect(c.destination);
+      const t = c.currentTime;
+      o.start(t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.stop(t + dur);
+    } catch (e) {}
+  }
+  _play(ch, fn) { if (this.channels[ch]) fn(); }
+
+  // —— 各场景音效 ——
+  nebula()   { this._play('nebula',   () => this.tone(90, 0.40, 'sine', 0.05)); }            // 星云坍缩：低频氛围音
+  gravity()  { this._play('gravity',  () => this.tone(200, 0.14, 'sine', 0.04, 150)); }       // 星体拖拽引力拉扯：渐变嗡鸣
+  ripple(d)  { this._play('ripple',   () => this.tone([520, 440, 360][d] || 360, 0.26, 'triangle', 0.045)); } // 涟漪阶梯音阶
+  tear()     { this._play('ripple',   () => this.tone(700, 0.34, 'sine', 0.04, 300)); }       // 时空撕裂：空灵回声
+  echo()     { this._play('ripple',   () => this.tone(80, 0.13, 'sawtooth', 0.04)); }         // 阻尼反弹冲突：短促警示
+  resonance(){ this._play('resonance',() => this.tone(720, 0.12, 'sine', 0.035)); }           // 跨时空共振
+
+  connect() { this.nebula(); }
+  isMuted() { return this.muted; }
+  setMuted(m) {
+    this.muted = !!m;
+    try { localStorage.setItem(KEY, this.muted ? 'off' : 'on'); } catch (e) {}
+    if (!this.muted) this.connect();
+  }
+  toggleMuted() { this.setMuted(!this.muted); return this.muted; }
+  setChannel(name, on) { if (name in this.channels) this.channels[name] = !!on; }
+  getChannels() { return Object.assign({}, this.channels); }
+}
+
+const Sound = new SoundEngine();
+
+__lx_exp["Sound"] = Sound;
+};
+__mods["js/engines/retirement.js"] = function(__lx_req, __lx_exp){
+// 引擎：渐进式延迟退休真实算法（与 PRD / 技术文档 v2.1 一致，经 Node 复算背书）
+// 政策来源：国务院关于渐进式延迟法定退休年龄的办法
+
+const FAFA = {
+  50: 195, 51: 190, 52: 185, 53: 180, 54: 175, 55: 170, 56: 164, 57: 158,
+  58: 152, 59: 145, 60: 139, 61: 132, 62: 125, 63: 117, 64: 109, 65: 101, 66: 93
+};
+
+function monthsFrom(y0, m0, y1, m1) {
+  return (y1 - y0) * 12 + (m1 - m0);
+}
+
+// 延迟月数：按政策档位逐月累加并封顶
+function delayMonths(type, by, bm) {
+  let elapsed;
+  if (type === 'male') {            // 1965-01 起，每 4 个月 +1，封顶 36
+    elapsed = monthsFrom(1965, 1, by, bm);
+    if (elapsed < 0) return 0;
+    return Math.min(36, Math.floor(elapsed / 4) + 1);
+  } else if (type === 'female55') { // 1970-01 起，每 4 个月 +1，封顶 36
+    elapsed = monthsFrom(1970, 1, by, bm);
+    if (elapsed < 0) return 0;
+    return Math.min(36, Math.floor(elapsed / 4) + 1);
+  } else {                          // female50：1975-01 起，每 2 个月 +1，封顶 60
+    elapsed = monthsFrom(1975, 1, by, bm);
+    if (elapsed < 0) return 0;
+    return Math.min(60, Math.floor(elapsed / 2) + 1);
+  }
+}
+
+// 最低缴费年限：2029 及以前 15 年；2030 起每年 +0.5，封顶 20
+function minPayYears(retireYear) {
+  if (retireYear <= 2029) return 15;
+  return Math.min(20, 15 + (retireYear - 2029) * 0.5);
+}
+
+function fmtYM(totalMonths) {
+  return { y: Math.floor(totalMonths / 12), m: totalMonths % 12 };
+}
+
+/**
+ * 计算退休时钟
+ * @param {object} p
+ * @param {number} p.birthYear
+ * @param {number} p.birthMonth 1-12
+ * @param {string} p.type 'male' | 'female55' | 'female50'
+ * @param {number} p.startYear 开始缴费年份
+ * @param {number} p.flex 弹性月数（负=提前，正=延迟，合法区间 [-36, +36]，且提前不得低于原法定年龄）
+ * @returns 完整结果对象
+ */
+function computeRetirement({ birthYear, birthMonth, type, startYear, flex = 0 }) {
+  const baseAge = type === 'male' ? 60 : (type === 'female55' ? 55 : 50);
+  const dm = delayMonths(type, birthYear, birthMonth);
+
+  const birthIdx = birthYear * 12 + (birthMonth - 1);
+  const statutoryIdx = birthIdx + baseAge * 12 + dm;
+  const earliestIdx = Math.max(statutoryIdx - 36, birthIdx + baseAge * 12);
+
+  let actualIdx = statutoryIdx + flex;
+  let clamped = false;
+  if (actualIdx < earliestIdx) { actualIdx = earliestIdx; clamped = true; }
+  if (actualIdx > statutoryIdx + 36) { actualIdx = statutoryIdx + 36; clamped = true; }
+
+  const ry = Math.floor(actualIdx / 12);
+  const rm = actualIdx % 12 + 1;
+  const actualAge = fmtYM(actualIdx - birthIdx);
+  const statAge = fmtYM(statutoryIdx - birthIdx);
+
+  const now = new Date();
+  const nowIdx = now.getFullYear() * 12 + now.getMonth();
+  const remainYears = Math.max(0, actualIdx - nowIdx) / 12;
+
+  const minY = minPayYears(ry);
+  const payY = Math.max(0, ry - (startYear || ry));
+
+  const fafaAge = Math.min(66, Math.max(50, Math.round((actualIdx - birthIdx) / 12)));
+
+  return {
+    baseAge, delayMonths: dm, flex,
+    statutoryAge: statAge, actualAge,
+    date: { year: ry, month: rm },
+    countdownYears: remainYears,
+    minPayYears: minY, payYears: payY,
+    fafaMonths: FAFA[fafaAge] || null,
+    clamped,
+    ageText: `实际退休年龄 ${actualAge.y}岁${actualAge.m ? actualAge.m + '个月' : ''}` +
+      `（法定 ${statAge.y}岁${statAge.m ? statAge.m + '个月' : ''}，延迟档位 +${dm} 个月` +
+      (flex !== 0 ? `，弹性 ${flex > 0 ? '+' : ''}${flex} 个月` : '') + '）'
+  };
+}
+
+__lx_exp["FAFA"] = FAFA;
+__lx_exp["delayMonths"] = delayMonths;
+__lx_exp["minPayYears"] = minPayYears;
+__lx_exp["computeRetirement"] = computeRetirement;
+};
+__mods["js/engines/rulebase.js"] = function(__lx_req, __lx_exp){
+// 引擎：关系传导规则库（模块8 业务逻辑来源）
+// 规划：200 → 2000 条生产规则；当前为可运行原型（Schema + 内联示例规则）
+// 生产化：将 strength/resistance 由查表获得，而非写死在内联常量中
+
+const RULE_SCHEMA = {
+  fields: {
+    from:   { type: 'enum',   desc: '传导源节点 id' },
+    to:     { type: 'enum',   desc: '传导目标节点 id' },
+    trigger:{ type: 'string', desc: '触发事件关键词（如 转行 / 延迟退休 / 收入下降）' },
+    strength:{ type: 'float', range: [0, 1], desc: '基础传导强度' },
+    resistance:{ type: 'float', range: [0, 1], desc: '关系阻尼系数（≥0.5 触发反弹波）' },
+    effect: { type: 'string', desc: '自然语言效应描述模板' },
+    confidence: { type: 'float', range: [0, 1], desc: '规则置信度（来源权重）' },
+    source: { type: 'enum',   desc: '规则来源：专家 / 统计 / 用户校准' }
+  },
+  plan: '原型内置 14 条示例规则；生产中扩展至 2000 条，按 trigger 模糊匹配 + 置信度加权。'
+};
+
+// 节点效应文案模板（命中后用于日志与报告）
+const EFFECT_MAP = {
+  me:      '轨迹主参数变化',
+  spouse:  '家庭现金流承压节点前移，其“稳定优先”权重上调',
+  child:   '教育预算曲线重算，兴趣班投入弹性区间收窄',
+  father:  '养老支持金计划调整，退休协同方案需重排',
+  mother:  '照护时间分配变化，随迁意愿参数更新',
+  boss:    '团队人力缺口风险上升，接任者培养计划提前',
+  mate:    '协作依赖重构，其晋升窗口概率 +3pt',
+  mentor:  '行业人脉网络节点迁移，推荐背书路径变化',
+  cohort1: '同代人星云统计分布微调',
+  cohort2: '镜像人群路径样本更新',
+  cohort3: '同类岗位竞争密度变化'
+};
+
+function describeEffect(id, impact) {
+  const base = EFFECT_MAP[id] || '轨迹参数微调';
+  const pct = Math.round(impact * 100);
+  return `${base}（传导强度 ${pct}%）`;
+}
+
+// 分域规则卡包（规划：200→2000 条；当前为可运行原型卡包，覆盖 5 大域）
+// 每条字段：id 规则编号 / title 标题 / domain 域 / impact 传导强度 / reach 预计波及人数 / risk 摩擦风险(高/低) / rebound 是否易反弹 / effect 主体-动作-客体文案
+const DOMAIN_COLORS = { family: '#d97706', career: '#0ea5e9', body: '#059669', money: '#7c3aed', social: '#e11d48' };
+const DOMAIN_LABELS = { family: '家庭', career: '事业', body: '身体', money: '金钱', social: '社交' };
+
+const RULE_PACKS = {
+  family: [
+    { id: 'family.bond',  title: '结婚 / 分手', domain: 'family', impact: 0.80, reach: 4, risk: '高', rebound: true,  effect: '家庭关系重组，配偶与子女的轨迹权重重排' },
+    { id: 'family.child', title: '生育',         domain: 'family', impact: 0.85, reach: 5, risk: '中', rebound: true,  effect: '育儿时间线前置，教育预算曲线重算' },
+    { id: 'family.care',  title: '照护父母',     domain: 'family', impact: 0.70, reach: 3, risk: '高', rebound: true,  effect: '父母照护诉求上升，随迁与时间分配参数变化' }
+  ],
+  career: [
+    { id: 'career.switch', title: '换工作',   domain: 'career', impact: 0.75, reach: 3, risk: '中', rebound: false, effect: '职业赛道切换，技能与被引用人脉网络迁移' },
+    { id: 'career.study',  title: '进修',     domain: 'career', impact: 0.45, reach: 2, risk: '低', rebound: false, effect: '能力曲线上修，晋升窗口概率微调' },
+    { id: 'career.found',  title: '创业',     domain: 'career', impact: 0.90, reach: 4, risk: '高', rebound: true,  effect: '现金流与风险敞口同步放大，同事/上级链路松动' },
+    { id: 'career.layoff', title: '被裁 / 降薪', domain: 'career', impact: 0.82, reach: 3, risk: '高', rebound: true, effect: '收入锚点失稳， cohort 竞争密度上升' }
+  ],
+  body: [
+    { id: 'body.health', title: '健康预警', domain: 'body', impact: 0.65, reach: 3, risk: '高', rebound: true,  effect: '身体信号倒逼节奏放缓，工作强度上限下移' }
+  ],
+  money: [
+    { id: 'money.debt',  title: '负债累积', domain: 'money', impact: 0.68, reach: 3, risk: '高', rebound: true,  effect: '现金流承压，储蓄与退休计划协同重排' },
+    { id: 'money.invest',title: '投资波动', domain: 'money', impact: 0.50, reach: 2, risk: '中', rebound: false, effect: '资产曲线震荡，风险偏好参数微调' }
+  ],
+  social: [
+    { id: 'social.relocate', title: '搬家 / 换城', domain: 'social', impact: 0.60, reach: 4, risk: '中', rebound: false, effect: '地缘圈层迁移，同事/导师链路需重建' },
+    { id: 'social.cut',      title: '断联',         domain: 'social', impact: 0.40, reach: 2, risk: '低', rebound: false, effect: '弱联系溶解，信息源收窄' }
+  ]
+};
+
+// 扁平检索表：ruleId → 规则元信息
+const RULE_INDEX = {};
+Object.values(RULE_PACKS).forEach(list => list.forEach(r => { RULE_INDEX[r.id] = r; }));
+
+function lookupRule(ruleId) {
+  if (!ruleId) return null;
+  return RULE_INDEX[ruleId] || null;
+}
+
+// 反弹故事句：把纯数字的摩擦度改成叙事句
+function describeRebound(from, to, impact, resistance) {
+  const FL = { me: '你', spouse: '配偶一栏', child: '子女一栏', father: '父亲一栏', mother: '母亲一栏',
+    boss: '上级一栏', mate: '同事一栏', mentor: '导师一栏', cohort1: '同代人A', cohort2: '同代人B', cohort3: '同代人C' };
+  const src = FL[from] || from, dst = FL[to] || to;
+  const pct = Math.round(resistance * 100);
+  const lvl = resistance >= 0.7 ? '狠狠' : '把';
+  return `${src}的阻力${lvl}浪潮折了回来——「${dst}」的惯性比你预想得更顽固（摩擦度 +${pct}%，传导强度被削去约 ${Math.round(resistance * 60)}%）`;
+}
+
+__lx_exp["RULE_SCHEMA"] = RULE_SCHEMA;
+__lx_exp["EFFECT_MAP"] = EFFECT_MAP;
+__lx_exp["describeEffect"] = describeEffect;
+__lx_exp["DOMAIN_COLORS"] = DOMAIN_COLORS;
+__lx_exp["DOMAIN_LABELS"] = DOMAIN_LABELS;
+__lx_exp["RULE_PACKS"] = RULE_PACKS;
+__lx_exp["lookupRule"] = lookupRule;
+__lx_exp["describeRebound"] = describeRebound;
+};
+__mods["js/engines/starmap.js"] = function(__lx_req, __lx_exp){
+// 引擎：人生星图 · 关系引力场（模块2/7/8 核心）
+// 11 节点 / 14 引力线，BFS 涟漪传导 + 阻尼(Resistance) + 反弹波(Echo)
+// v2.2 修复：resistance≥0.5 时真实衰减 nextImpact *= (1 - resistance*0.6)，而非仅视觉/日志层
+
+const COLORS = { me: '#4f46e5', family: '#d97706', work: '#0ea5e9', cohort: '#94a3b8' };
+
+const NODES = [
+  { id: 'me',      label: '我',        tier: 0, color: COLORS.me,     r: 16 },
+  { id: 'spouse',  label: '配偶',      tier: 1, color: COLORS.family, r: 11 },
+  { id: 'child',   label: '子女',      tier: 1, color: COLORS.family, r: 9  },
+  { id: 'father',  label: '父亲',      tier: 1, color: COLORS.family, r: 10 },
+  { id: 'mother',  label: '母亲',      tier: 1, color: COLORS.family, r: 10 },
+  { id: 'boss',    label: '直属上级',  tier: 2, color: COLORS.work,   r: 8  },
+  { id: 'mate',    label: '核心同事',  tier: 2, color: COLORS.work,   r: 8  },
+  { id: 'mentor',  label: '行业导师',  tier: 2, color: COLORS.work,   r: 8  },
+  { id: 'cohort1', label: '同代人A',   tier: 3, color: COLORS.cohort, r: 6  },
+  { id: 'cohort2', label: '同代人B',   tier: 3, color: COLORS.cohort, r: 6  },
+  { id: 'cohort3', label: '同代人C',   tier: 3, color: COLORS.cohort, r: 6  }
+];
+
+// [src, dst, strength, resistance]
+const LINKS = [
+  ['me','spouse',0.9,0.30], ['me','child',0.85,0.20], ['me','father',0.7,0.70], ['me','mother',0.7,0.70],
+  ['me','boss',0.5,0.40], ['me','mate',0.45,0.30], ['me','mentor',0.4,0.20],
+  ['spouse','child',0.8,0.25], ['father','mother',0.75,0.30],
+  ['mate','cohort1',0.2,0.30], ['mentor','cohort2',0.2,0.30], ['boss','cohort3',0.15,0.30],
+  ['me','cohort1',0.15,0.20], ['me','cohort2',0.12,0.20]
+];
+
+const DECAY = [1, 0.7, 0.4, 0.15];
+
+function nodeById(id) {
+  for (const n of NODES) if (n.id === id) return n;
+  return null;
+}
+
+/**
+ * 涟漪传导引擎（BFS）
+ * @param {string} sourceId 事件源
+ * @param {number} baseImpact 初始影响强度
+ * @param {object} [links] 可选自定义引力线（默认 LINKS）
+ * @returns {{results: Array, affected: Set}}
+ */
+function castRipple(sourceId, baseImpact, links = LINKS) {
+  const results = [];
+  const visited = { [sourceId]: true };
+  const queue = [{ id: sourceId, depth: 0, impact: baseImpact }];
+
+  while (queue.length) {
+    const cur = queue.shift();
+    for (const lk of links) {
+      const nb = lk[0] === cur.id ? lk[1] : (lk[1] === cur.id ? lk[0] : null);
+      if (!nb || visited[nb]) continue;
+      const strength = lk[2];
+      const resistance = lk[3] || 0;
+      // 衰减
+      let nextImpact = cur.impact * strength * (DECAY[cur.depth + 1] || 0.1);
+      // v2.2 阻尼真实衰减：高阻尼削弱传导
+      if (resistance >= 0.5) nextImpact *= (1 - resistance * 0.6);
+      if (Math.abs(nextImpact) < 0.05) continue;
+      visited[nb] = true;
+      queue.push({ id: nb, depth: cur.depth + 1, impact: nextImpact });
+      results.push({
+        from: cur.id, to: nb, depth: cur.depth + 1,
+        impact: nextImpact, resistance
+      });
+    }
+  }
+  results.sort((a, b) => a.depth - b.depth);
+  const affected = new Set(results.map(r => r.to));
+  affected.add(sourceId);
+  return { results, affected };
+}
+
+const SCENES = {
+  career: { source: 'me',   name: '我 2027 年转行 AI 产品经理', impact: 0.9 },
+  retire: { source: 'me',   name: '我选择延迟退休 3 年（弹性上限）', impact: 0.75 },
+  spouse: { source: 'spouse', name: '配偶收入下降 30%', impact: 0.85 }
+};
+
+__lx_exp["COLORS"] = COLORS;
+__lx_exp["NODES"] = NODES;
+__lx_exp["LINKS"] = LINKS;
+__lx_exp["DECAY"] = DECAY;
+__lx_exp["nodeById"] = nodeById;
+__lx_exp["castRipple"] = castRipple;
+__lx_exp["SCENES"] = SCENES;
+};
+__mods["js/engines/vectorMatrix.js"] = function(__lx_req, __lx_exp){
+// 引擎：结构相似度向量矩阵（模块3 历史匹配透明化）
+// 三维结构向量：[系统网络脆弱性, 替代技术出现速度, 官僚体制锁死程度]
+// 方法：余弦相似度 cosine(a,b) = dot / (|a|·|b|)
+
+function cosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
+  }
+  na = Math.sqrt(na); nb = Math.sqrt(nb);
+  if (!na || !nb) return 0;
+  return dot / (na * nb);
+}
+
+function norm(v) {
+  const n = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+  return v.map(x => x / n);
+}
+
+// 返回与 v 正交的单位向量（叉乘一个主轴）
+function perpTo(v) {
+  const a = Math.abs(v[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+  const px = v[1] * a[2] - v[2] * a[1];
+  const py = v[2] * a[0] - v[0] * a[2];
+  const pz = v[0] * a[1] - v[1] * a[0];
+  const len = Math.hypot(px, py, pz) || 1;
+  return [px / len, py / len, pz / len];
+}
+
+// 由目标余弦 c 与基准向量 U 构造历史向量：D = c·Û + √(1-c²)·P，保证 cosine(U,D)=c
+function buildFromCosine(U, c) {
+  const u = norm(U);
+  const p = perpTo(u);
+  const s = Math.sqrt(1 - c * c);
+  return u.map((x, i) => x * c + p[i] * s);
+}
+
+const DIMS = ['系统网络脆弱性', '替代技术出现速度', '官僚体制锁死程度'];
+
+// 以「当前用户结构向量」为基准，按 PRD 文档标注的相似度构造历史参照向量
+// 默认 user 向量下，与各朝代余弦 ≈ 文档示例值（唐 0.985 / 宋 0.94 / 明 0.95）
+function buildReferences(userVec) {
+  return [
+    { name: '唐朝 · 漕运吏员', cosine: 0.985, vec: buildFromCosine(userVec, 0.985) },
+    { name: '明朝 · 工部匠户', cosine: 0.95,  vec: buildFromCosine(userVec, 0.95) },
+    { name: '宋朝 · 市舶司',   cosine: 0.94,  vec: buildFromCosine(userVec, 0.94) }
+  ];
+}
+
+// 实时计算：当前用户向量 vs 某历史向量
+function similarity(userVec, refVec) {
+  return cosine(norm(userVec), refVec);
+}
+
+__lx_exp["cosine"] = cosine;
+__lx_exp["DIMS"] = DIMS;
+__lx_exp["buildReferences"] = buildReferences;
+__lx_exp["similarity"] = similarity;
+};
+__mods["js/main.js"] = function(__lx_req, __lx_exp){
+// 应用入口：无框架路由 + 背景星网 + 全局交互层（L1 交互增强）
+const { nebula } = __lx_req("js/modules/nebula.js");
+const { starmapView } = __lx_req("js/modules/starmapView.js");
+const { twin } = __lx_req("js/modules/twin.js");
+const { retirement } = __lx_req("js/modules/retirement.js");
+const { probe } = __lx_req("js/modules/probe.js");
+const { report } = __lx_req("js/modules/report.js");
+const { Sound } = __lx_req("js/engines/audio.js");
+const { reset, getState, subscribe } = __lx_req("js/store.js");
+const MODULES = [nebula, starmapView, twin, retirement, probe, report];
+
+const stage = document.getElementById('stage');
+const nav = document.getElementById('nav');
+const soundBtn = document.getElementById('soundToggle');
+const micBtn = document.getElementById('micBtn');
+
+let current = null;
+
+// 全局应用句柄（模块向其中注册能力，快捷键/语音统一调度）
+const LTApp = {
+  route,
+  narrate,
+  reset,
+  Sound,
+  starmapRipple: null   // 由星图模块挂载时注册
+};
+window.LTApp = LTApp;
+
+function narrate(text, channel) {
+  const t = document.getElementById('narrativeText');
+  const bar = document.getElementById('narrativeBar');
+  if (t) t.textContent = text;
+  if (bar) {
+    bar.classList.toggle('echo', /反弹|阻力|摩擦|折了回来/.test(text));
+    bar.setAttribute('data-ch', channel || 'sys');
+  }
+}
+
+// HUD：探针年徽章 + 人生完整度环 + 侧栏状态点
+const HUE = { nebula: '#7c3aed', starmap: '#4f46e5', twin: '#0ea5e9', retirement: '#d97706', probe: '#0ea5e9', report: '#1f2937' };
+function completeness() {
+  const s = getState();
+  let v = 0;
+  if (s.profile.injected) v += 25;
+  v += Math.min(20, (s.decisions || []).length * 5);
+  v += Math.min(20, (s.markers || []).length * 4);
+  if ((s.twinPicks || []).length) v += 15;
+  if (s.retirement) v += 20;
+  return Math.min(100, v);
+}
+function updateHud() {
+  const s = getState();
+  const yr = s.settings.probeYear || 2026;
+  const yEl = document.getElementById('hudYear'); if (yEl) yEl.textContent = '探针 ' + yr;
+  const rEl = document.getElementById('hudRing'); if (rEl) rEl.textContent = completeness() + '%';
+  // 侧栏状态点
+  const statusOf = (id) => {
+    const st = getState();
+    if (id === 'nebula') return st.profile.injected ? 'ok' : 'idle';
+    if (id === 'starmap') return (st.decisions || []).length ? (st.frictionUnresolved > 0 ? 'conf' : 'ok') : 'idle';
+    if (id === 'twin') return (st.twinPicks || []).length ? 'ok' : 'idle';
+    if (id === 'retirement') return st.retirement ? 'ok' : 'idle';
+    if (id === 'probe') return st.settings.probeYear > 2026 ? 'ok' : 'idle';
+    if (id === 'report') return (st.decisions || []).length ? 'ok' : 'idle';
+    return 'idle';
+  };
+  nav.querySelectorAll('.nav-item').forEach(b => {
+    let dot = b.querySelector('.nav-dot');
+    if (!dot) { dot = document.createElement('span'); dot.className = 'nav-dot'; b.appendChild(dot); }
+    dot.className = 'nav-dot ' + statusOf(MODULES.find(m => b.textContent.includes(m.title)).id);
+  });
+}
+
+// 时代广播 + 内心独白（叙事条三通道轮播）
+const ERA = {
+  2026: '2026 · 行业周期横盘，确定性成为稀缺品', 2027: '2027 · AI 重构岗位边界，中年转型窗口开启',
+  2028: '2028 · 延迟退休细则落地，长线规划被迫前移', 2029: '2029 · 行业周期下行，现金防御优先',
+  2030: '2030 · 缴费年限门槛抬升，补缴窗口收窄', 2031: '2031 · 银发经济扩容，第二曲线浮现',
+  2032: '2032 · 组织扁平化，个体价值重估', 2033: '2033 · 地缘与产业再布局',
+  2034: '2034 · 技能半衰期缩短', 2035: '2035 · 延迟退休政策到位，代际接力显性化', 2036: '2036 · 长周期收束，静水流深'
+};
+function monologue() {
+  const s = getState();
+  const d = s.profile.dilemma || (s.profile.fearSeed ? '怕 ' + s.profile.fearSeed : '未知');
+  const pool = [
+    '内心独白：我真正怕的，或许不是「' + d + '」，而是来不及准备。',
+    '内心独白：每一个决策，都是给未来的自己写的一封信。',
+    '内心独白：若十年后回望，我最想确认的，是今天没有逃避。'
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function eraBroadcast() {
+  const yr = getState().settings.probeYear || 2026;
+  const ch = Math.random() < 0.5 ? 'era' : 'mono';
+  narrate(ch === 'era' ? ('时代广播 · ' + (ERA[yr] || ('探针 ' + yr + ' · 时代静默'))) : monologue(), ch);
+}
+
+function buildNav() {
+  MODULES.forEach((m, i) => {
+    const item = document.createElement('button');
+    item.className = 'nav-item' + (i === 0 ? ' active' : '');
+    item.innerHTML = '<span class="nav-idx">0' + (i + 1) + '</span>' + m.title + '<span class="nav-dot idle"></span>';
+    item.addEventListener('click', () => route(m.id));
+    nav.appendChild(item);
+  });
+}
+
+function route(id) {
+  const m = MODULES.find(x => x.id === id);
+  if (!m || (current && current.id === id)) return;
+  if (current && current.unmount) current.unmount();
+  stage.innerHTML = '';
+  m.mount(stage);
+  current = m;
+  nav.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(m.title));
+  });
+  stage.scrollTop = 0;
+  const DEG = { nebula: 275, starmap: 0, twin: 190, retirement: 35, probe: 190, report: 225 };
+  const bg = document.getElementById('bgStarNet');
+  if (bg) bg.style.filter = 'hue-rotate(' + (DEG[id] || 0) + 'deg)';
+  narrate(m.subtitle || m.title);
+  updateHud();
+}
+
+// 背景星网（白色主视觉）
+function initBgStarNet() {
+  const canvas = document.getElementById('bgStarNet');
+  if (!canvas) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W, H, particles = [];
+  const COUNT = window.innerWidth < 768 ? 40 : 90;
+  const LINK_DIST = 130;
+  const mouse = { x: -9999, y: -9999 };
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function init() {
+    particles = [];
+    for (let i = 0; i < COUNT; i++) {
+      particles.push({ x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.8 + 0.8 });
+    }
+  }
+  function step() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of particles) {
+      const dxm = mouse.x - p.x, dym = mouse.y - p.y, dm2 = dxm * dxm + dym * dym;
+      if (dm2 < 22500 && dm2 > 1) { const f = 0.012 / Math.sqrt(dm2); p.vx += dxm * f; p.vy += dym * f; }
+      p.vx *= 0.995; p.vy *= 0.995; p.x += p.vx; p.y += p.vy;
+      if (p.x < -10) p.x = W + 10; if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10; if (p.y > H + 10) p.y = -10;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(79,70,229,0.28)'; ctx.fill();
+    }
+    for (let a = 0; a < particles.length; a++) {
+      for (let b = a + 1; b < particles.length; b++) {
+        const dx = particles[a].x - particles[b].x, dy = particles[a].y - particles[b].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < LINK_DIST) {
+          ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y);
+          ctx.strokeStyle = 'rgba(79,70,229,' + (0.10 * (1 - d / LINK_DIST)).toFixed(3) + ')';
+          ctx.lineWidth = 1; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('resize', () => { resize(); init(); });
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('mouseout', () => { mouse.x = -9999; mouse.y = -9999; });
+  resize(); init();
+  if (reduced) {
+    for (const p of particles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(79,70,229,0.25)'; ctx.fill(); }
+  } else requestAnimationFrame(step);
+}
+
+// 分层音效面板
+function initAudioPanel() {
+  const panel = document.getElementById('audioPanel');
+  soundBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', (e) => {
+    if (panel.style.display !== 'none' && !panel.contains(e.target) && e.target !== soundBtn) panel.style.display = 'none';
+  });
+  const mute = document.getElementById('ch_mute');
+  mute.checked = Sound.isMuted();
+  mute.addEventListener('change', () => {
+    Sound.setMuted(mute.checked);
+    soundBtn.textContent = mute.checked ? '🔇' : '🔊';
+  });
+  [['nebula', 'ch_nebula'], ['gravity', 'ch_gravity'], ['ripple', 'ch_ripple'], ['resonance', 'ch_resonance']]
+    .forEach(([ch, id]) => {
+      const cb = document.getElementById(id);
+      cb.checked = Sound.getChannels()[ch];
+      cb.addEventListener('change', () => Sound.setChannel(ch, cb.checked));
+    });
+}
+
+// 全局快捷键（规格「七.3」）
+function initShortcuts() {
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (current && current.id === 'starmap' && LTApp.starmapRipple) {
+        LTApp.starmapRipple();
+        narrate('空格 · 在星图投下一颗「决策石子」，涟漪向外扩散。');
+      } else {
+        narrate('提示：切换到「星图宇宙」后按空格，可一键生成决策涟漪。');
+      }
+    } else if (e.key === 'r' || e.key === 'R') {
+      reset();
+      if (current) { current.unmount && current.unmount(); stage.innerHTML = ''; current.mount(stage); }
+      narrate('已重置星云与星图（R 键）。');
+    } else if (e.key === 'm' || e.key === 'M') {
+      const muted = Sound.toggleMuted();
+      soundBtn.textContent = muted ? '🔇' : '🔊';
+      narrate(muted ? '已静音（M 键）。' : '已开启音效（M 键）。');
+    }
+  });
+}
+
+// 语音指令（Web Speech API，纯前端，Chrome / Edge 原生支持）
+function initVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const tip = document.getElementById('voiceTip');
+  if (!SR) {
+    micBtn.title = '当前浏览器不支持语音指令（请用 Chrome / Edge）';
+    micBtn.addEventListener('click', () => {
+      tip.style.display = 'block';
+      tip.textContent = '当前浏览器不支持 Web Speech API，请用 Chrome / Edge 体验语音指令。';
+      setTimeout(() => (tip.style.display = 'none'), 2600);
+    });
+    return;
+  }
+  const rec = new SR();
+  rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
+  let active = false;
+  micBtn.addEventListener('click', () => { if (active) rec.stop(); else { try { rec.start(); } catch (e) {} } });
+  rec.onstart = () => {
+    active = true; micBtn.classList.add('rec');
+    tip.style.display = 'block';
+    tip.textContent = '聆听中… 说：涟漪 / 宇宙 / 退休 / 重置 / 分屏 / 报告';
+  };
+  rec.onend = () => { active = false; micBtn.classList.remove('rec'); setTimeout(() => { if (!active) tip.style.display = 'none'; }, 1500); };
+  rec.onerror = () => { active = false; micBtn.classList.remove('rec'); tip.style.display = 'block'; tip.textContent = '语音识别结束或不可用。'; setTimeout(() => (tip.style.display = 'none'), 2000); };
+  rec.onresult = (e) => {
+    const txt = (e.results[0][0].transcript || '').toLowerCase();
+    tip.textContent = '识别：' + txt;
+    let handled = true;
+    if (txt.includes('涟漪') || txt.includes('生成')) {
+      if (current && current.id === 'starmap' && LTApp.starmapRipple) LTApp.starmapRipple();
+      else route('starmap');
+    } else if (txt.includes('宇宙') || txt.includes('平行') || txt.includes('分裂')) {
+      const sp = document.getElementById('btnSplit'); if (sp) sp.click(); else route('probe');
+    } else if (txt.includes('退休')) { route('retirement'); }
+    else if (txt.includes('重置') || txt.includes('清空')) {
+      reset(); if (current) { current.unmount && current.unmount(); stage.innerHTML = ''; current.mount(stage); }
+    } else if (txt.includes('分屏')) { route('twin'); }
+    else if (txt.includes('报告')) { route('report'); }
+    else handled = false;
+    if (handled) narrate('语音指令：「' + txt + '」已执行。');
+  };
+}
+
+buildNav();
+initBgStarNet();
+initAudioPanel();
+initShortcuts();
+initVoice();
+route('nebula');
+// 数据变化 → 实时刷新 HUD（完整度环 / 侧栏状态点）
+subscribe(() => updateHud());
+// 叙事条三通道：每 15s 轮播「时代广播 / 内心独白」
+setInterval(eraBroadcast, 15000);
+
+};
+__mods["js/modules/nebula.js"] = function(__lx_req, __lx_exp){
+// 模块1：混沌星云注入 · 创世 Data Injection
+const { el } = __lx_req("js/utils/dom.js");
+const { fitCanvas, fitCanvasFlex, rafLoop, onResize } = __lx_req("js/utils/canvas.js");
+const { Sound } = __lx_req("js/engines/audio.js");
+const { getState, update } = __lx_req("js/store.js");
+const LABELS = {
+  age: { t: '年龄', v: '28-32', opts: ['22-26', '28-32', '33-38', '39-45', '46+'] },
+  ind: { t: '行业', v: '互联网', opts: ['互联网', '制造业', '金融', '教育', '医疗', '自由职业'] },
+  dilemma: { t: '困境', v: '成长停滞', opts: ['成长停滞', '收入瓶颈', '关系张力', '健康预警', '意义缺失'] }
+};
+const HIDDEN = {
+  family: { t: '原生家庭', v: '未填', opts: ['亲密', '疏离', '重担', '未和解'] },
+  debt: { t: '负债感', v: '未填', opts: ['无', '房贷', '消费债', '人情债'] },
+  body: { t: '身体信号', v: '未填', opts: ['良好', '亚健', '告警', '慢病'] },
+  faith: { t: '信仰/无信仰', v: '未填', opts: ['无信仰', '世俗成就', '家庭本位', '精神追求'] }
+};
+const CITY_OPTS = ['一线', '新一线', '二线', '返乡'];
+
+const nebula = {
+  id: 'nebula',
+  title: '混沌星云注入',
+  subtitle: '把简历拖入星云，质能坍缩凝聚出代表「我」的主星体',
+  mount(root) {
+    const canvas = el('canvas', { id: 'nebulaCanvas', class: 'mod-canvas' });
+    const meter = el('div', { class: 'meter-fill', id: 'nebulaMeter' });
+    const meterText = el('span', { id: 'nebulaMeterText', text: '待注入 · 0%' });
+    const hint = el('p', { class: 'hint', id: 'nebulaHint', text: '点击下方按钮，将你的简历「质能化」注入星云。' });
+    const injectBtn = el('button', { class: 'btn primary', id: 'nebulaInject', text: '✦ 注入简历质能' });
+    const positions = getState().positions || {};
+    const chips = ['age', 'ind', 'dilemma'].map(k =>
+      el('div', { class: 'grav-chip', 'data-k': k, draggable: 'true', text: LABELS[k].t + '：' + (positions[k] || LABELS[k].v) + '  ？' }));
+    const hiddenRow = el('div', { class: 'grav-row hidden-row', id: 'hiddenRow', style: { display: 'none' } },
+      Object.keys(HIDDEN).map(k => el('div', { class: 'grav-chip hidden-chip', 'data-k': k, draggable: 'true', text: HIDDEN[k].t + '：未填' })));
+    const toggleHidden = el('button', { class: 'btn', id: 'toggleHidden', text: '✥ 隐藏维度（原生家庭 / 负债 / 身体 / 信仰）' });
+    const pop = el('div', { class: 'chip-pop', id: 'chipPop', style: { display: 'none' } });
+    const fearInput = el('input', { class: 'fear-input', id: 'fearSeed', placeholder: '✎ 一句话命运种子：「我最怕的是……」',
+      value: getState().profile.fearSeed || '' });
+    const redoRow = el('div', { class: 'redo-row', id: 'redoRow', style: { display: 'none' } }, [
+      el('button', { class: 'btn', id: 'redoKeep', text: '保留决策历史' }),
+      el('button', { class: 'btn', id: 'redoClear', text: '清空涟漪重来' })
+    ]);
+
+    function openEdit(key, def, chip) {
+      pop.innerHTML = '';
+      pop.appendChild(el('div', { class: 'pop-title', text: '编辑「' + def.t + '」' }));
+      def.opts.forEach(o => {
+        const b = el('button', { class: 'pop-opt', text: o });
+        b.addEventListener('click', () => {
+          const pos = Object.assign({}, getState().positions); pos[key] = o; update('positions', pos);
+          chip.textContent = def.t + '：' + o + '  ？';
+          chip.classList.add('done');
+          Sound.ripple(0); narrate('质能字段「' + def.t + '」已设为 ' + o + '。');
+          pop.style.display = 'none';
+          if (key === 'ind') update('profile.industry', o);
+          if (key === 'dilemma') update('profile.dilemma', o);
+          if (key === 'age') update('profile.age', parseInt((o.match(/\\d+/) || [30])[0], 10));
+        });
+        pop.appendChild(b);
+      });
+      pop.style.display = 'block';
+    }
+    chips.forEach(c => c.addEventListener('click', () => openEdit(c.getAttribute('data-k'), LABELS[c.getAttribute('data-k')], c)));
+    hiddenRow.querySelectorAll('.grav-chip').forEach(c => {
+      const k = c.getAttribute('data-k');
+      c.addEventListener('click', () => openEdit(k, HIDDEN[k], c));
+      c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', k); e.dataTransfer.effectAllowed = 'copy'; });
+    });
+    toggleHidden.addEventListener('click', () => {
+      const show = hiddenRow.style.display === 'none';
+      hiddenRow.style.display = show ? 'flex' : 'none';
+      narrate(show ? '已展开隐藏维度：原生家庭、负债感、身体信号、信仰——它们将影响阻尼与双生匹配。' : '已收起隐藏维度。');
+    });
+    fearInput.addEventListener('input', () => {
+      update('profile.fearSeed', fearInput.value);
+      if (fearInput.value.trim()) {
+        // 命运种子：把对家庭的隐性担忧转译为默认阻尼抬升（仅 demo 推演用）
+        const map = Object.assign({}, getState().edgeResistance);
+        map['father|mother'] = Math.min(0.9, (map['father|mother'] || 0.30) + 0.1);
+        map['me|father'] = Math.min(0.9, (map['me|father'] || 0.70));
+        update('edgeResistance', map);
+        if (!injected) inject();
+      }
+    });
+    redoRow.querySelector('#redoKeep').addEventListener('click', () => { injected = true; condenseT = 1; condense = 1; redoRow.style.display = 'none'; narrate('已重塑本我，决策历史保留。'); });
+    redoRow.querySelector('#redoClear').addEventListener('click', () => {
+      update('decisions', []); update('lastRipple', null); update('markers', []); update('frictionUnresolved', 0);
+      redoRow.style.display = 'none'; narrate('已清空涟漪，本我重塑。'); Sound.connect();
+    });
+
+    const stage = el('div', { class: 'nebula-stage' }, [
+      el('div', { class: 'nebula-canvas-wrap' }, [canvas]),
+      el('div', { class: 'meter', html: '' }, [meter]),
+      el('div', { class: 'meter-cap' }, [meterText]),
+      el('div', { class: 'grav-row' }, chips),
+      hiddenRow, toggleHidden, fearInput, pop,
+      injectBtn, redoRow, hint
+    ]);
+    root.appendChild(stage);
+
+    const ctx = canvas.getContext('2d');
+    let W, H, cx, cy, dpr = 1, zoom = 1;
+    let particles = [], tagNodes = [];
+    let injected = false, condenseT = 0, condense = 0, orbit = 0, fill = 0;
+    const doneChips = { age: false, ind: false, dilemma: false };
+    const st = getState();
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+
+    function resize() {
+      const f = fitCanvasFlex(canvas);
+      W = f.W; H = f.H; dpr = f.dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = W / 2; cy = H * 0.56;
+    }
+    function seed() {
+      particles = [];
+      for (let i = 0; i < 140; i++) {
+        particles.push({ x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+          r: Math.random() * 1.6 + 0.6, a: Math.random() * 0.4 + 0.2 });
+      }
+    }
+    function setFill(v) {
+      fill = Math.max(0, Math.min(100, v));
+      meter.style.width = fill + '%';
+      meterText.textContent = (injected ? '自动提取中' : '待注入') + ' · ' + Math.round(fill) + '%';
+    }
+    function updateFeat() {
+      if (fill < 72) return;
+      update('profile.features.hard', 'Java后端 / 微服务');
+      update('profile.features.life', '深耕期后半');
+      update('profile.features.niche', '可替代中层');
+    }
+    function inject() {
+      if (injected) return;
+      injected = true; condenseT = 0;
+      update('profile.injected', true); // 简历质能已注入，立即标记，下游模块据此联动
+      hint.textContent = '简历被解析为「质能」——星云正坍缩，凝聚出代表你的主星体。';
+      Sound.connect();
+    }
+    function injectChip(k) {
+      if (!injected) inject();
+      if (doneChips[k]) return;
+      doneChips[k] = true;
+      setFill(fill + 9);
+      const c = root.querySelector('.grav-chip[data-k="' + k + '"]');
+      if (c) c.classList.add('done');
+      Sound.ripple(0);
+      updateFeat();
+      if (fill >= 100) {
+        hint.textContent = '主星体凝聚完成 ✦ 特征已写入引力网，可进入下一步分析。';
+        update('profile.injected', true);
+      }
+    }
+    function draw() {
+      orbit += 0.01;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      ctx.translate(cx, cy); ctx.scale(zoom, zoom); ctx.translate(-cx, -cy);
+      if (!injected || condense < 1) {
+        particles.forEach(p => {
+          if (injected) {
+            const dx = cx - p.x, dy = cy - p.y, d = Math.hypot(dx, dy) || 1;
+            const sp = Math.min(d, 2.4 * condenseT);
+            p.x += dx / d * sp; p.y += dy / d * sp;
+            condenseT += 0.004; if (condenseT > 1) condenseT = 1;
+          } else {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > W) p.vx *= -1;
+            if (p.y < 0 || p.y > H) p.vy *= -1;
+          }
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(120,128,160,' + p.a + ')'; ctx.fill();
+        });
+        if (injected && condenseT >= 1) {
+          condense = 1;
+          tagNodes = [
+            { k: 'age', ang: -0.6, rad: 64, r: 9 },
+            { k: 'ind', ang: 1.5, rad: 82, r: 9 },
+            { k: 'dilemma', ang: 3.0, rad: 72, r: 9 }
+          ];
+          setFill(72); updateFeat();
+          hint.textContent = '主星体已凝聚。四周漂浮出引力微粒——点击未填字段注入，或拖拽滑块微调。';
+        }
+      } else {
+        particles.forEach(p => {
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(150,158,190,0.18)'; ctx.fill();
+        });
+      }
+      if (condense >= 1) {
+        const pulse = 1 + Math.sin(orbit * 3) * 0.06;
+        ctx.beginPath(); ctx.arc(cx, cy, 18 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(79,70,229,0.18)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 12 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = '#4f46e5'; ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = '600 11px -apple-system,"PingFang SC",sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('我', cx, cy + 4);
+        tagNodes.forEach(t => {
+          t.ang += 0.012;
+          const tx = cx + Math.cos(t.ang) * t.rad, ty = cy + Math.sin(t.ang) * t.rad * 0.7;
+          t.x = tx; t.y = ty;
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty);
+          ctx.strokeStyle = 'rgba(217,119,6,0.25)'; ctx.lineWidth = 1; ctx.stroke();
+          ctx.beginPath(); ctx.arc(tx, ty, t.r, 0, Math.PI * 2);
+          ctx.fillStyle = doneChips[t.k] ? '#059669' : '#d97706'; ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = '600 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(doneChips[t.k] ? '✓' : '?', tx, ty + 3);
+          ctx.fillStyle = '#475069'; ctx.font = '11px -apple-system,sans-serif';
+          ctx.fillText(LABELS[t.k], tx, ty - t.r - 5);
+        });
+      }
+      ctx.restore();
+    }
+
+    chips.forEach(c => {
+      c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', c.getAttribute('data-k')); e.dataTransfer.effectAllowed = 'copy'; });
+    });
+    injectBtn.addEventListener('click', () => {
+      if (!injected) { inject(); injectBtn.textContent = '✦ 重塑本我'; return; }
+      redoRow.style.display = 'flex';
+      narrate('再次注入将重塑本我。请选择：保留决策历史，或清空涟漪重来。');
+    });
+    canvas.addEventListener('click', e => {
+      if (condense < 1) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      for (const t of tagNodes) {
+        if (t.x == null) continue;
+        if (Math.hypot(mx - t.x, my - t.y) <= (t.r + 6)) { injectChip(t.k); break; }
+      }
+    });
+    // 全画布拖拽：把引力微粒拖入星云完成填充（L1 · 一.4）
+    canvas.addEventListener('dragover', e => { e.preventDefault(); canvas.style.outline = '2px dashed var(--accent)'; });
+    canvas.addEventListener('dragleave', () => { canvas.style.outline = 'none'; });
+    canvas.addEventListener('drop', e => {
+      e.preventDefault(); canvas.style.outline = 'none';
+      const k = e.dataTransfer.getData('text/plain');
+      if (k) { injectChip(k); Sound.gravity(); narrate('质能微粒「' + LABELS[k] + '」已拖入星云。'); }
+    });
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoom = Math.max(0.5, Math.min(2.5, zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+      narrate('星云缩放 ×' + zoom.toFixed(1));
+    }, { passive: false });
+    const offResize = onResize(resize);
+    resize(); seed();
+    const loop = rafLoop(draw);
+
+    // 若之前已注入，恢复状态
+    if (st.profile.injected) {
+      injected = true; condense = 1; condenseT = 1; fill = 100;
+      tagNodes = [{ k: 'age', ang: -0.6, rad: 64, r: 9, x: 0, y: 0 },
+                  { k: 'ind', ang: 1.5, rad: 82, r: 9, x: 0, y: 0 },
+                  { k: 'dilemma', ang: 3.0, rad: 72, r: 9, x: 0, y: 0 }];
+      Object.keys(doneChips).forEach(k => doneChips[k] = true);
+      root.querySelectorAll('.grav-chip').forEach(c => c.classList.add('done'));
+      setFill(100);
+      injectBtn.textContent = '✦ 重塑本我';
+      hint.textContent = '主星体已凝聚（已恢复上次注入）。';
+    }
+
+    this._dispose = () => { loop.stop(); offResize(); };
+  },
+  unmount() { if (this._dispose) this._dispose(); }
+};
+
+__lx_exp["nebula"] = nebula;
+};
+__mods["js/modules/probe.js"] = function(__lx_req, __lx_exp){
+// 模块5：光阴探针 & 平行宇宙撕裂（L1 增强：多轨道探针）
+//  - 底部光阴探针轨道：可拖手柄（x→年份），轨道实时形变（P0 · 7.1/7.2/7.3）
+//  - 松手 1.2s 回放（P0 · 7.3）
+//  - 多轨道：拖出/添加多条平行宇宙探针，每轨独立年份（L1 · 五.1）
+//  - Ctrl+拖手柄：复制该平行宇宙轨道
+//  - 激进度 agg≥0.92 → A/B 撕裂（P2 · 7.4）
+// 算法不重写：仅消费 year → 轨道半径映射（现有 system() 逻辑）
+const { el } = __lx_req("js/utils/dom.js");
+const { fitCanvas, fitCanvasFlex, rafLoop, onResize } = __lx_req("js/utils/canvas.js");
+const { Sound } = __lx_req("js/engines/audio.js");
+const { update, getState, subscribe } = __lx_req("js/store.js");
+const MIN_Y = 2026, MAX_Y = 2036;
+const PALETTE = ['#4f46e5', '#0ea5e9', '#059669', '#d97706', '#e11d48'];
+// 政策窗（静态，仅展示性提示）
+const POLICY_WINDOWS = [
+  { year: 2030, label: '缴费年限调整窗口' },
+  { year: 2035, label: '延迟退休政策到位' }
+];
+
+const probe = {
+  id: 'probe',
+  title: '光阴探针 & 平行宇宙撕裂',
+  subtitle: '拖动底部探针手柄改变年份，星系轨道实时扩张；可添加多条平行宇宙轨道，Ctrl+拖复制；激进度拉满将撕裂',
+  mount(root) {
+    const canvas = el('canvas', { id: 'probeCanvas', class: 'mod-canvas' });
+    const sl = el('input', { type: 'range', id: 'sl_probe', min: String(MIN_Y), max: String(MAX_Y), value: '2026', class: 'probe-slider' });
+    const probeYear = el('span', { id: 'probeYear', class: 'probe-year', text: '年份 2026' });
+    const addTrackBtn = el('button', { class: 'btn', id: 'btnAddTrack', text: '＋ 添加平行宇宙轨道' });
+    const btnSplit = el('button', { id: 'btnSplit', class: 'btn', text: '✂ 路径分叉撕裂（A/B 双轨）' });
+    const agg = el('input', { type: 'range', id: 'sl_agg', min: '0', max: '1', step: '0.01', value: '0', class: 'probe-slider' });
+    const aggVal = el('span', { id: 'aggVal', text: '激进度 0%' });
+    const splitWrap = el('div', { id: 'splitWrap', class: 'split-wrap', style: { display: 'none' } }, [
+      el('div', { class: 'split-panel' }, [el('h4', { text: 'A · 转行' }), el('p', { class: 'muted', text: '技能重组，前 3 年轨道半径快速扩张，不确定性高但上限更高。' })]),
+      el('div', { class: 'split-panel' }, [el('h4', { text: 'B · 不转行' }), el('p', { class: 'muted', text: '轨道缓慢扩张，稳定但受行业周期压制，天花板可见。' })])
+    ]);
+    const track = el('div', { class: 'probe-track', id: 'probeTrack' }, [
+      el('div', { class: 'probe-track-fill', id: 'probeTrackFill' })
+    ]);
+    const headsEl = el('div', { class: 'probe-heads', id: 'probeHeads' });
+    const pinsEl = el('div', { class: 'probe-pins', id: 'probePins' });
+    track.appendChild(headsEl);
+    track.appendChild(pinsEl);
+    const stage = el('div', { class: 'probe-stage' }, [
+      el('div', { class: 'probe-canvas-wrap' }, [canvas]),
+      el('div', { class: 'probe-controls' }, [
+        el('div', { class: 'probe-axis' }, [el('span', { text: '2026' }), probeYear, el('span', { text: '2036' })]),
+        sl, addTrackBtn, btnSplit,
+        el('div', { class: 'probe-axis', style: { marginTop: '14px' } }, [el('span', { text: '激进度（满阈值撕裂）' }), aggVal]),
+        agg
+      ]),
+      track,
+      splitWrap
+    ]);
+    root.appendChild(stage);
+
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const ctx = canvas.getContext('2d');
+    let W, H, cy, t = 0, split = false, aggression = 0, playing = false, tearTimer = null;
+    let tracks = [{ year: 2026, color: PALETTE[0] }];
+    const rings = [[26, '#4f46e5'], [42, '#d97706'], [58, '#0ea5e9'], [74, '#059669']];
+
+    function resize() {
+      const f = fitCanvasFlex(canvas);
+      W = f.W; H = f.H; cy = H / 2; ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
+      renderHeads();
+      renderPins();
+    }
+    function system(cx, grow, title, titleColor) {
+      ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2); ctx.fillStyle = titleColor; ctx.fill();
+      ctx.fillStyle = titleColor; ctx.font = '600 12px -apple-system,"PingFang SC",sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(title, cx, 18);
+      rings.forEach((r, idx) => {
+        const rr = r[0] + (tracks[0].year - 2026) * (idx === 0 ? 5 * grow : 2 * grow) + Math.sin(t * 2 + idx) * 2;
+        ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+        ctx.strokeStyle = r[1] + '55'; ctx.lineWidth = 1; ctx.stroke();
+        const ang = t * (0.6 + idx * 0.15) + idx;
+        const px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr;
+        ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fillStyle = r[1]; ctx.fill();
+      });
+    }
+    function draw() {
+      t += 0.012; ctx.clearRect(0, 0, W, H);
+      const n = tracks.length;
+      tracks.forEach((tr, i) => {
+        const cx = n === 1 ? W / 2 : W * (i + 1) / (n + 1);
+        system(cx, 1.0 + aggression * 0.6, '轨道' + (i + 1) + ' · ' + tr.year, tr.color);
+      });
+      if (split) {
+        ctx.save();
+        ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(225,29,72,0.6)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(W / 2, 30); ctx.lineTo(W / 2, H - 20); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle = '#e11d48'; ctx.font = '600 12px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('撕裂面', W / 2, 24); ctx.restore();
+      }
+    }
+    function setTrackYear(i, y, fromUser) {
+      y = Math.max(MIN_Y, Math.min(MAX_Y, Math.round(y)));
+      tracks[i].year = y;
+      probeYear.textContent = '年份 ' + tracks[0].year;
+      sl.value = String(tracks[0].year);
+      renderHeads();
+      renderPins();
+      // 经过事件钉：轻微卡顿 + 音效（记忆点）
+      if (fromUser) {
+        const pa = pinAt(y);
+        if (pa && pa !== lastPinYear) { Sound.gravity(); narrate('⟡ 探针掠过 ' + pa + ' 年事件钉。'); }
+        lastPinYear = pa;
+        update('settings.probeYear', tracks[0].year);
+        Sound.ripple(0);
+      }
+    }
+    function renderHeads() {
+      headsEl.innerHTML = '';
+      tracks.forEach((tr, i) => {
+        const head = el('div', { class: 'probe-head', 'data-idx': i, text: String(tr.year) });
+        head.style.left = ((tr.year - MIN_Y) / (MAX_Y - MIN_Y) * 100) + '%';
+        head.style.background = tr.color;
+        head.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          head.setPointerCapture(e.pointerId);
+          const startY = tracks[i].year, sx = e.clientX;
+          const move = ev => {
+            if (e.ctrlKey && Math.abs(ev.clientX - sx) > 6 && tracks.length < 5) {
+              // Ctrl+拖：复制该平行宇宙轨道
+              tracks.push({ year: startY, color: PALETTE[tracks.length % PALETTE.length] });
+              narrate('已复制平行宇宙轨道（Ctrl+拖），当前 ' + tracks.length + ' 条。');
+              renderHeads(); return;
+            }
+            const r = document.getElementById('probeTrack').getBoundingClientRect();
+            const pct = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+            setTrackYear(i, MIN_Y + pct * (MAX_Y - MIN_Y), true);
+          };
+          const up = () => {
+            document.removeEventListener('pointermove', move);
+            document.removeEventListener('pointerup', up);
+            startPlayback(i);
+          };
+          document.addEventListener('pointermove', move);
+          document.addEventListener('pointerup', up);
+        });
+        headsEl.appendChild(head);
+      });
+      document.getElementById('probeTrackFill').style.width = ((tracks[0].year - MIN_Y) / (MAX_Y - MIN_Y) * 100) + '%';
+    }
+    function yearFromClientX(clientX) {
+      const r = document.getElementById('probeTrack').getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+      return MIN_Y + pct * (MAX_Y - MIN_Y);
+    }
+    // 事件钉：决策钉 / 退休钉 / 政策窗
+    function renderPins() {
+      if (!pinsEl) return;
+      pinsEl.innerHTML = '';
+      const stt = getState();
+      const pins = [];
+      (stt.decisions || []).forEach(d => { if (d.year) pins.push({ year: d.year, cls: 'pin-dec', label: d.name }); });
+      (stt.markers || []).forEach(m => pins.push({ year: m.year, cls: m.type === 'retire' ? 'pin-retire' : 'pin-policy', label: m.label }));
+      POLICY_WINDOWS.forEach(p => pins.push({ year: p.year, cls: 'pin-policy', label: p.label }));
+      pins.forEach(p => {
+        const tick = el('div', { class: 'probe-pin ' + p.cls, title: p.year + ' · ' + p.label });
+        tick.style.left = ((p.year - MIN_Y) / (MAX_Y - MIN_Y) * 100) + '%';
+        tick.addEventListener('click', (e) => { e.stopPropagation(); setTrackYear(0, p.year, true); narrate('探针跳至 ' + p.year + '：' + p.label); });
+        pinsEl.appendChild(tick);
+      });
+    }
+    let lastPinYear = null;
+    function pinAt(year) {
+      const ys = [];
+      getState().decisions.forEach(d => { if (d.year) ys.push(d.year); });
+      getState().markers.forEach(m => ys.push(m.year));
+      POLICY_WINDOWS.forEach(p => ys.push(p.year));
+      return ys.find(y => Math.abs(y - year) <= 0.5) || null;
+    }
+    // 主轨道条点击 / 拖动 → 轨道 0
+    document.getElementById('probeTrack').addEventListener('pointerdown', e => {
+      if (e.target.classList.contains('probe-head')) return;
+      setTrackYear(0, yearFromClientX(e.clientX), true);
+    });
+    sl.addEventListener('input', () => { cancelPlayback(); setTrackYear(0, parseInt(sl.value, 10), true); });
+
+    // 回放：探针头从 2026 走到当前年份（1.2s）
+    let playRAF = 0;
+    function cancelPlayback() { if (playRAF) { cancelAnimationFrame(playRAF); playRAF = 0; } playing = false; }
+    function startPlayback(i) {
+      cancelPlayback(); playing = true;
+      const from = MIN_Y, to = tracks[i].year, dur = 1200, t0 = performance.now();
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / dur);
+        setTrackYear(i, from + (to - from) * k, false);
+        if (k < 1) { playRAF = requestAnimationFrame(step); }
+        else { playing = false; playRAF = 0; }
+      };
+      playRAF = requestAnimationFrame(step);
+    }
+
+    // 添加平行宇宙轨道
+    addTrackBtn.addEventListener('click', () => {
+      if (tracks.length >= 5) { narrate('已达轨道上限（5 条）。'); return; }
+      tracks.push({ year: 2026, color: PALETTE[tracks.length % PALETTE.length] });
+      renderHeads();
+      narrate('已添加第 ' + tracks.length + ' 条平行宇宙轨道。');
+      Sound.connect();
+    });
+
+    // 激进撕裂（P2 · 7.4）
+    agg.addEventListener('input', () => {
+      aggression = parseFloat(agg.value);
+      aggVal.textContent = '激进度 ' + Math.round(aggression * 100) + '%';
+      update('settings.probeAggression', aggression);
+      if (aggression >= 0.92) {
+        if (!tearTimer) tearTimer = setTimeout(() => { doTear(true); tearTimer = null; }, 200);
+      } else if (tearTimer) { clearTimeout(tearTimer); tearTimer = null; }
+    });
+    function doTear(on) {
+      if (split === on) return;
+      split = on;
+      btnSplit.textContent = split ? '✂ 合并双轨（单星系）' : '✂ 路径分叉撕裂（A/B 双轨）';
+      splitWrap.style.display = split ? 'grid' : 'none';
+      update('settings.split', split);
+      Sound.connect();
+    }
+    btnSplit.addEventListener('click', () => { doTear(!split); });
+
+    if (getState().settings.probeYear > MIN_Y) setTrackYear(0, getState().settings.probeYear, false);
+    if (getState().settings.split) doTear(true);
+
+    const offResize = onResize(resize);
+    resize();
+    const loop = rafLoop(draw);
+    // 订阅 store：星图抛决策 / 退休钉生成后，事件钉实时刷新
+    let unsub = null;
+    if (typeof subscribe === 'function') unsub = subscribe(() => { renderPins(); });
+    this._dispose = () => { loop.stop(); offResize(); if (unsub) unsub(); cancelPlayback(); if (tearTimer) clearTimeout(tearTimer); };
+  },
+  unmount() { if (this._dispose) this._dispose(); }
+};
+
+__lx_exp["probe"] = probe;
+};
+__mods["js/modules/report.js"] = function(__lx_req, __lx_exp){
+// 模块6：个人断代史报告（可视化档案，替代纯文字主交互）
+// 四件可视化：① 主体画像雷达 ② 退休生命相位条 ③ 关系涟漪传播图 ④ 双生共振对比条
+const { el } = __lx_req("js/utils/dom.js");
+const { getState, update } = __lx_req("js/store.js");
+const { NODES, LINKS, nodeById, castRipple } = __lx_req("js/engines/starmap.js");
+const { buildReferences } = __lx_req("js/engines/vectorMatrix.js");
+// ===== 可视化生成（纯 SVG，零新依赖） =====
+function radarSVG(vals, labels) {
+  const cx = 140, cy = 132, R = 92, n = vals.length;
+  let grid = '';
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+      pts.push((cx + R * f * Math.cos(a)).toFixed(1) + ',' + (cy + R * f * Math.sin(a)).toFixed(1));
+    }
+    grid += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#e7e9f2" stroke-width="1"/>';
+  });
+  let axes = '', labs = '', dots = '';
+  const proj = [];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    const ex = cx + R * Math.cos(a), ey = cy + R * Math.sin(a);
+    axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + ex.toFixed(1) + '" y2="' + ey.toFixed(1) + '" stroke="#e7e9f2"/>';
+    const lx = cx + (R + 18) * Math.cos(a), ly = cy + (R + 18) * Math.sin(a);
+    labs += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6b7280">' + labels[i] + '</text>';
+    const vx = cx + R * (vals[i] / 100) * Math.cos(a), vy = cy + R * (vals[i] / 100) * Math.sin(a);
+    proj.push([vx, vy]);
+    dots += '<circle cx="' + vx.toFixed(1) + '" cy="' + vy.toFixed(1) + '" r="3" fill="#4f46e5"/>';
+  }
+  const poly = '<polygon points="' + proj.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') +
+    '" fill="rgba(79,70,229,0.20)" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>';
+  return '<svg viewBox="0 0 280 264" class="rv-svg rv-radar">' + grid + axes + poly + dots + labs + '</svg>';
+}
+
+function retireBarSVG(r) {
+  if (!r) return '<p class="muted">（尚未计算，请前往「退休时钟」模块）</p>';
+  const retireAge = r.actualAge.y + (r.actualAge.m || 0) / 12;
+  const startAge = 22;
+  const total = Math.max(1, retireAge - startAge);
+  const elapsed = Math.max(0, total - r.countdownYears);
+  const frac = Math.max(0, Math.min(1, elapsed / total));
+  const W = 620, H = 76, pad = 12, barW = W - pad * 2, x0 = pad, y = 44, bh = 22;
+  const fillW = barW * frac;
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rv-svg" style="max-width:660px;margin:0 auto">' +
+    '<text x="' + x0 + '" y="22" font-size="12" fill="#6b7280">22 岁（入职）</text>' +
+    '<text x="' + (W - pad) + '" y="22" text-anchor="end" font-size="12" fill="#6b7280">' + r.date.year + ' 年退休</text>' +
+    '<rect x="' + x0 + '" y="' + y + '" width="' + barW + '" height="' + bh + '" rx="11" fill="#eef0f6"/>' +
+    '<rect x="' + x0 + '" y="' + y + '" width="' + fillW.toFixed(1) + '" height="' + bh + '" rx="11" fill="#4f46e5"/>' +
+    '<text x="' + (x0 + barW / 2) + '" y="' + (y + bh / 2 + 4) + '" text-anchor="middle" font-size="11" fill="#fff">工作进度 ' + Math.round(frac * 100) + '% · 距退休 ' + r.countdownYears.toFixed(1) + ' 年</text>' +
+    '</svg>';
+}
+
+function rippleSVG(lr) {
+  if (!lr || !lr.results || !lr.results.length)
+    return '<p class="muted">（尚未触发，请前往「星图宇宙」点击星体或选择情景）</p>';
+  const cx = 180, cy = 160, R = 120, n = NODES.length;
+  const pos = {};
+  NODES.forEach((nd, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    pos[nd.id] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
+  });
+  const affected = new Set(lr.results.map(r => r.to));
+  const conflict = new Set(lr.results.filter(r => r.resistance >= 0.5).map(r => r.to));
+  let lines = '';
+  LINKS.forEach(lk => {
+    const a = pos[lk[0]], b = pos[lk[1]];
+    if (!a || !b) return;
+    const hi = lk[3] >= 0.5;
+    lines += '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) +
+      '" stroke="' + (hi ? 'rgba(225,29,72,0.30)' : 'rgba(79,70,229,0.18)') + '" stroke-width="' + (0.6 + lk[2] * 2).toFixed(2) + '"/>';
+  });
+  let dots = '';
+  NODES.forEach(nd => {
+    const p = pos[nd.id];
+    let col = '#d97706';
+    if (nd.id === 'me' || nd.tier === 0) col = '#4f46e5';
+    else if (conflict.has(nd.id)) col = '#e11d48';
+    else if (affected.has(nd.id)) col = '#0ea5e9';
+    const r = nd.id === 'me' ? 10 : (affected.has(nd.id) ? 8 : 6);
+    dots += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + r + '" fill="' + col + '"><title>' + nd.label + '</title></circle>';
+    dots += '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + r + 11) + '" text-anchor="middle" font-size="10" fill="#475069">' + nd.label + '</text>';
+  });
+  return '<svg viewBox="0 0 360 320" class="rv-svg" style="max-width:440px;margin:0 auto">' + lines + dots + '</svg>';
+}
+
+function twinBars(tp) {
+  if (!tp || !tp.length) return '<p class="muted">（尚未生成，请前往「双生时空剪影」调节结构向量）</p>';
+  return '<div class="twin-bars">' + tp.map(d => {
+    const v = Math.round(d.sim * 100);
+    return '<div class="tb-row"><span>' + d.name + '</span><div class="tb-track"><div class="tb-fill" style="width:' + v + '%"></div></div><span class="tb-val">' + v + '%</span></div>';
+  }).join('') + '</div>';
+}
+
+const report = {
+  id: 'report',
+  title: '个人断代史报告',
+  subtitle: '汇总星云注入、退休时钟、星图涟漪、双生共振，生成一页可打印的「人生断代史」可视化档案',
+  mount(root) {
+    const st = getState();
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const jumpStarmap = () => {
+      window.LTApp.route('starmap');
+      narrate('报告 → 跳转星图，重演关系涟漪。');
+      setTimeout(() => { if (window.LTApp.starmapRipple) window.LTApp.starmapRipple(); }, 30);
+    };
+    const sec = (id, title, bodyNode) => el('section', { class: 'report-sec', id: id }, [
+      el('h3', { text: title }), bodyNode
+    ]);
+
+    // 一、主体画像雷达
+    const p = st.profile;
+    const ageNum = parseInt(p.age, 10) || 30;
+    const indigo = (p.industry && p.industry.indexOf('互联网') >= 0) ? 70 : (p.industry ? 50 : 35);
+    const ageCap = ageNum <= 30 ? 82 : ageNum <= 40 ? 72 : ageNum <= 50 ? 58 : 42;
+    const anti = (p.features.niche && /可替代/.test(p.features.niche)) ? 32 : 72;
+    const radarVals = [
+      p.features.hard ? 72 : 30,
+      indigo,
+      ageCap,
+      p.features.life ? 66 : 36,
+      anti
+    ];
+    const radarLabels = ['技能深度', '行业前景', '年龄资本', '生涯确定', '抗替代'];
+    const sec1 = sec('s1', '一、主体画像（能力雷达）',
+      el('div', { html: radarSVG(radarVals, radarLabels) }));
+
+    // 二、退休生命相位条
+    const r = st.retirement;
+    const sec2 = sec('s2', '二、退休时钟（生命相位）',
+      el('div', { html: retireBarSVG(r) }));
+
+    // 三、关系涟漪传播图（点击跳转星图）
+    // 无真实涟漪时，复用真实引擎 castRipple 生成代表性扩散图，避免回退成纯文字占位
+    const lrReal = st.lastRipple;
+    const lr = (lrReal && lrReal.results && lrReal.results.length)
+      ? lrReal
+      : { source: 'me', name: '代表性事件 · 职业决策', impact: 0.72, results: castRipple('me', 0.72).results, _sample: true };
+    const rippleWrap = el('div', { class: 'rv-ripple', title: '点击重演涟漪' }, [
+      el('div', { html: rippleSVG(lr) }),
+      el('p', { class: 'rv-cap', text:
+        (lr._sample ? '示例演示 · ' : '触发事件：' + lr.name + '（强度 ' + lr.impact.toFixed(2) + '）· ') +
+        '点击图区可跳转星图重演' })
+    ]);
+    rippleWrap.addEventListener('click', jumpStarmap);
+    const sec3 = sec('s3', '三、关系涟漪传导（点击跳转星图）', rippleWrap);
+
+    // 四、双生共振对比条
+    // 无真实匹配时，用默认结构向量算出历史人物同源度，避免回退成纯文字占位
+    const tpReal = st.twinPicks;
+    const tp = (tpReal && tpReal.length)
+      ? tpReal
+      : buildReferences([0.7, 0.8, 0.5]).map(r => ({ name: r.name, sim: r.cosine }));
+    const sec4 = sec('s4', '四、历史结构共振（同源度）',
+      el('div', {}, [
+        el('div', { html: twinBars(tp) }),
+        el('p', { class: 'rv-cap', text:
+          (tpReal && tpReal.length) ? '由「双生时空剪影」滑块实时匹配'
+            : '示例演示 · 调节双生滑块可替换为你的真实匹配' })
+      ]));
+
+    // 五、衍生指标卡（冲突指数 / 被波及人数 / 最强阻力边）
+    const decs = st.decisions || [];
+    const lastR = st.lastRipple;
+    const affectedTotal = (lastR && lastR.results) ? lastR.results.length : 0;
+    const conflictIdx = (st.frictionUnresolved || 0) + decs.filter(d => d.rebound).length;
+    let strongest = null;
+    LINKS.forEach(lk => { if (!strongest || lk[3] > strongest[3]) strongest = lk; });
+    const conflictLabel = strongest ? (nodeById(strongest[0]).label + '—' + nodeById(strongest[1]).label) : '—';
+    const metricsHTML =
+      '<div class="report-cards">' +
+        '<div class="rc-card"><div class="rc-k">决策次数</div><div class="rc-v">' + decs.length + '</div></div>' +
+        '<div class="rc-card"><div class="rc-k">被波及人数合计</div><div class="rc-v">' + affectedTotal + '</div></div>' +
+        '<div class="rc-card"><div class="rc-k">冲突指数</div><div class="rc-v" style="color:var(--echo)">' + conflictIdx + '</div></div>' +
+        '<div class="rc-card"><div class="rc-k">最强阻力边</div><div class="rc-v">' + conflictLabel + '</div></div>' +
+      '</div>';
+    const sec5 = sec('s5', '五、推演衍生指标', el('div', { html: metricsHTML }));
+
+    // 六、关键涟漪编年体（年份 · 事件 · 波及 · 是否反弹；可隐藏单条）
+    const chronoItems = decs.length
+      ? decs.slice().reverse().map((d, k) => {
+          const reach = (d.results && d.results.length) ? d.results.length : '—';
+          return '<li class="chrono-item" data-i="' + (decs.length - 1 - k) + '">' +
+            '<span class="ch-year">' + (d.year || '—') + '</span>' +
+            '<span class="ch-evt">' + d.name + '</span>' +
+            '<span class="ch-reach">波及 ' + reach + '</span>' +
+            (d.rebound ? '<span class="ch-flag">反弹</span>' : '<span class="ch-flag ok">顺行</span>') +
+            '<button class="ch-hide" title="从导出中隐藏">⊘</button></li>';
+        }).join('')
+      : '<li class="muted">尚无决策记录。前往「星图宇宙」点击星体抛下决策石子，编年史将在此生长。</li>';
+    const chronoList = el('ul', { class: 'chrono-list', html: chronoItems });
+    chronoList.addEventListener('click', e => {
+      const btn = e.target.closest('.ch-hide');
+      if (btn) { const li = btn.closest('.chrono-item'); li.classList.toggle('hidden-out'); narrate('已切换该条编年记录的导出可见性。'); }
+    });
+    const sec6 = sec('s6', '六、关键涟漪编年体', chronoList);
+
+    // 七、给十年后的信（可编辑末段，存入 store 形成情感闭环）
+    const letterTA = el('textarea', { class: 'letter-ta', id: 'letterTA', placeholder: '写一句话给十年后的自己……（将随报告一起保存）' });
+    letterTA.value = st.letter || '';
+    letterTA.addEventListener('input', () => update('letter', letterTA.value));
+    const sec7 = sec('s7', '七、给十年后的信',
+      el('div', {}, [letterTA, el('p', { class: 'rv-cap', text: '这一段只属于你，不会出现在任何统计口径中。' })]));
+
+    // 维度筛选 chip（保留联动交互）
+    const chips = [['s1', '画像'], ['s2', '退休'], ['s3', '涟漪'], ['s4', '共振'], ['s5', '指标'], ['s6', '编年'], ['s7', '信件']].map(([id, label]) => {
+      const c = el('span', { class: 'filter-chip active', 'data-sec': id, text: label });
+      c.addEventListener('click', () => {
+        const on = c.classList.toggle('active');
+        const secEl = document.getElementById(id);
+        if (secEl) secEl.classList.toggle('dim', !on);
+        narrate('报告维度筛选：' + label + (on ? ' 显示' : ' 隐藏'));
+      });
+      return c;
+    });
+
+    // 导出仪式：2s 收束动画（星图→种子→信封）+ 水印长图
+    const exportBtn = el('button', { class: 'btn primary', id: 'exportBtn', text: '✦ 收束为我的断代史' });
+    const seal = el('div', { class: 'export-seal', id: 'exportSeal' }, [
+      el('div', { class: 'seal-dot' }),
+      el('div', { class: 'seal-txt', text: '星图收束为种子……' })
+    ]);
+    exportBtn.addEventListener('click', () => {
+      seal.style.display = 'flex';
+      narrate('正在收束你的人生断代史……');
+      setTimeout(() => { seal.querySelector('.seal-txt').textContent = '写入信封……'; }, 800);
+      setTimeout(() => {
+        seal.style.display = 'none';
+        const wm = '星衍 LifeVerse · 我的断代史 · 探针年 ' + (st.settings.probeYear || 2026);
+        const area = root.querySelector('.report-stage').cloneNode(true);
+        area.querySelectorAll('.filter-chips, .report-foot, .export-seal, .ch-hide').forEach(n => n.remove());
+        const w = window.open('', '_blank');
+        if (w) {
+          w.document.write('<html><head><meta charset="utf-8"><title>' + wm + '</title>' +
+            '<style>body{font-family:-apple-system,"PingFang SC",sans-serif;padding:32px;color:#1a1d2e}#wm{position:fixed;bottom:8px;right:12px;font-size:11px;color:#9aa0b4}section{margin-bottom:18px;border:1px solid #e7e9f2;border-radius:14px;padding:16px}h3{color:#4f46e5}textarea{display:none}</style></head><body>' +
+            area.innerHTML + '<div id="wm">' + wm + '</div></body></html>');
+          w.document.close(); w.print();
+        } else {
+          narrate('浏览器拦截了新窗口，已为你准备打印视图（Ctrl/Cmd+P）。');
+          window.print();
+        }
+      }, 2000);
+    });
+
+    const stage = el('div', { class: 'report-stage' }, [
+      el('div', { class: 'report-head' }, [
+        el('h2', { text: '星衍 LifeVerse · 个人断代史报告' }),
+        el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center', marginTop: '6px' } }, [
+          el('p', { class: 'muted', text: '本报告由前序模块数据自动汇编，仅存于本地浏览器。' }),
+          exportBtn
+        ]),
+        seal
+      ]),
+      el('div', { class: 'filter-chips' }, chips),
+      sec1, sec2, sec3, sec4, sec5, sec6, sec7,
+      el('div', { class: 'report-foot', text: '— 报告完 · 星海静默处，亦有你的回声 —' })
+    ]);
+    root.appendChild(stage);
+    this._dispose = () => {};
+  },
+  unmount() { if (this._dispose) this._dispose(); }
+};
+
+__lx_exp["report"] = report;
+};
+__mods["js/modules/retirement.js"] = function(__lx_req, __lx_exp){
+// 模块4：退休时钟（渐进式延迟退休真实算法）
+const { el } = __lx_req("js/utils/dom.js");
+const { computeRetirement } = __lx_req("js/engines/retirement.js");
+const { Sound } = __lx_req("js/engines/audio.js");
+const { getState, update } = __lx_req("js/store.js");
+const retirement = {
+  id: 'retirement',
+  title: '退休时钟',
+  subtitle: '基于渐进式延迟退休政策的真实算法：延迟档位 / 弹性钳制 / 最低缴费年限 / 计发月数',
+  mount(root) {
+    const st = getState();
+    const defaultBirthYear = Math.max(1950, new Date().getFullYear() - (st.profile.age || 30));
+
+    const birth = el('input', { type: 'month', id: 'rt_birth', value: defaultBirthYear + '-06' });
+    const type = el('select', { id: 'rt_type' }, [
+      el('option', { value: 'male', text: '男职工（原 60）' }),
+      el('option', { value: 'female55', text: '女干部/女性灵活就业（原 55）' }),
+      el('option', { value: 'female50', text: '女工人（原 50）' })
+    ]);
+    const start = el('input', { type: 'number', id: 'rt_startYear', value: String(defaultBirthYear + 22), min: '1970', max: '2035' });
+    const flex = el('input', { type: 'range', id: 'rt_flex', min: '-36', max: '36', value: '0' });
+    const flexVal = el('span', { id: 'rt_flexVal', text: '法定退休' });
+    const calcBtn = el('button', { class: 'btn primary', id: 'rt_calc', text: '计算退休时钟' });
+
+    const dialEl = el('div', { class: 'clock-dial', id: 'rt_dial' });
+    const g1El = el('div', { class: 'gauge', id: 'rt_g1' });
+    const g2El = el('div', { class: 'gauge', id: 'rt_g2' });
+    const noteEl = el('details', { class: 'clock-note', id: 'rt_note' }, [
+      el('summary', { text: '政策时钟解读（点击展开）' })
+    ]);
+
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const CUR_Y = new Date().getFullYear();
+    const magBlock = (txt, data, cls) => el('div', { class: 'mag-block' + (cls ? ' ' + cls : ''), draggable: 'true', text: txt, 'data-drag': data });
+    const gBlocks = [{ label: '男职工', val: 'male' }, { label: '女干部/灵活就业', val: 'female55' }, { label: '女工人', val: 'female50' }]
+      .map(g => magBlock(g.label, JSON.stringify({ type: 'gender', val: g.val })));
+    const pBlocks = [15, 20, 25, 30].map(y => magBlock(y + ' 年缴费', JSON.stringify({ type: 'pay', val: y }), 'pay'));
+    const slotType = el('div', { class: 'drop-slot', id: 'slotType', text: '拖入参保身份' });
+    const slotStart = el('div', { class: 'drop-slot', id: 'slotStart', text: '拖入缴费年限' });
+    const magnet = el('div', { class: 'retire-magnet' }, [
+      el('h4', { text: '🧲 磁块拖拽（也可直接填上方表单）' }),
+      el('div', { class: 'mag-row' }, gBlocks),
+      el('div', { class: 'mag-row' }, pBlocks),
+      el('div', { class: 'drop-slots' }, [slotType, slotStart])
+    ]);
+    [].concat(gBlocks, pBlocks).forEach(b => b.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', b.getAttribute('data-drag')); e.dataTransfer.effectAllowed = 'copy';
+    }));
+    [slotType, slotStart].forEach(slot => {
+      slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('over'); });
+      slot.addEventListener('dragleave', () => slot.classList.remove('over'));
+      slot.addEventListener('drop', e => {
+        e.preventDefault(); slot.classList.remove('over');
+        const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
+        if (data.type === 'gender') type.value = data.val;
+        else if (data.type === 'pay') start.value = String(CUR_Y - data.val);
+        calc(); Sound.gravity();
+        narrate('磁块已吸附：' + (data.type === 'gender' ? '参保身份=' + data.val : '预计缴费=' + data.val + ' 年'));
+      });
+    });
+
+    const stage = el('div', { class: 'retire-stage' }, [
+      el('div', { class: 'retire-form' }, [
+        el('label', { text: '出生年月' }), birth,
+        el('label', { text: '参保身份' }), type,
+        el('label', { text: '开始缴费年份' }), start,
+        el('label', { text: '弹性档位' }), el('div', { class: 'flex-row' }, [flex, flexVal]),
+        calcBtn
+      ]),
+      el('div', { class: 'retire-result' }, [
+        dialEl,
+        el('div', { class: 'gauge-row' }, [g1El, g2El]),
+        noteEl
+      ]),
+      magnet
+    ]);
+    root.appendChild(stage);
+
+    // ===== 表盘 / 仪表 SVG 生成 =====
+    function polar(cx, cy, R, deg) {
+      const a = (deg - 90) * Math.PI / 180;
+      return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
+    }
+    function arc(cx, cy, R, d0, d1) {
+      const x0 = polar(cx, cy, R, d0), x1 = polar(cx, cy, R, d1);
+      const large = (d1 - d0) > 180 ? 1 : 0;
+      return 'M' + x0[0].toFixed(1) + ' ' + x0[1].toFixed(1) + ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x1[0].toFixed(1) + ' ' + x1[1].toFixed(1);
+    }
+    function gPt(cx, cy, R, f) {
+      const rad = f * Math.PI;
+      return [cx - R * Math.cos(rad), cy - R * Math.sin(rad)];
+    }
+    function gaugeHTML(cx, cy, R, f, val, cap, color) {
+      f = Math.max(0, Math.min(1, f));
+      const p = gPt(cx, cy, R, f);
+      const large = f > 0.5 ? 1 : 0;
+      return '<svg viewBox="0 0 160 92" aria-label="' + cap + '">' +
+        '<path d="M' + (cx - R) + ' ' + cy + ' A' + R + ' ' + R + ' 0 0 0 ' + (cx + R) + ' ' + cy + '" fill="none" stroke="#eef0f6" stroke-width="14" stroke-linecap="round"/>' +
+        '<path d="M' + (cx - R) + ' ' + cy + ' A' + R + ' ' + R + ' 0 ' + large + ' 0 ' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round"/>' +
+        '</svg>' +
+        '<div class="g-val" style="color:' + color + '">' + val + '</div>' +
+        '<div class="g-cap">' + cap + '</div>';
+    }
+    function calc() {
+      const parts = birth.value.split('-');
+      if (parts.length < 2) return;
+      const by = parseInt(parts[0], 10), bm = parseInt(parts[1], 10);
+      const t = type.value;
+      const flexV = parseInt(flex.value, 10);
+      const r = computeRetirement({ birthYear: by, birthMonth: bm, type: t, startYear: parseInt(start.value, 10), flex: flexV });
+      const LIFE = 85;
+      const curAge = Math.max(0, CUR_Y - by);
+      const retAge = r.actualAge.y + (r.actualAge.m || 0) / 12;
+      const aLived = Math.min(LIFE, curAge), aRet = Math.min(LIFE, retAge);
+      const retired = curAge >= retAge;
+      const cx = 150, cy = 150, R = 108, sw = 18;
+      const segs = [
+        { d0: 0, d1: aLived / LIFE * 360, c: '#4f46e5' },
+        { d0: aLived / LIFE * 360, d1: aRet / LIFE * 360, c: '#d97706' },
+        { d0: aRet / LIFE * 360, d1: 360, c: '#059669' }
+      ];
+      let arcs = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="#eef0f6" stroke-width="' + sw + '"/>';
+      segs.forEach(function (s) {
+        if (s.d1 <= s.d0) return;
+        arcs += '<path d="' + arc(cx, cy, R, s.d0, s.d1) + '" fill="none" stroke="' + s.c + '" stroke-width="' + sw + '" stroke-linecap="round"/>';
+      });
+      const m = polar(cx, cy, R, aRet / LIFE * 360);
+      const tip = polar(cx, cy, R - 18, curAge / LIFE * 360);
+      arcs += '<circle cx="' + m[0].toFixed(1) + '" cy="' + m[1].toFixed(1) + '" r="7" fill="#e11d48" stroke="#fff" stroke-width="2"/>';
+      arcs += '<line x1="' + cx + '" y1="' + cy + '" x2="' + tip[0].toFixed(1) + '" y2="' + tip[1].toFixed(1) + '" stroke="#1a1d2e" stroke-width="3"/>';
+      arcs += '<circle cx="' + cx + '" cy="' + cy + '" r="5" fill="#1a1d2e"/>';
+      const cdTxt = retired ? '已退休' : r.countdownYears.toFixed(1);
+      dialEl.innerHTML = '<svg viewBox="0 0 300 300" role="img" aria-label="退休时钟表盘">' + arcs +
+        '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" font-size="40" font-weight="800" fill="#4f46e5">' + cdTxt + '</text>' +
+        '<text x="' + cx + '" y="' + (cy + 22) + '" text-anchor="middle" font-size="14" fill="#6b7280">' + (retired ? '' : '年 · 距退休') + '</text>' +
+        '<text x="' + cx + '" y="' + (cy + 46) + '" text-anchor="middle" font-size="14" fill="#1a1d2e">预计 ' + r.date.year + '.' + String(r.date.month).padStart(2, '0') + ' 退休</text>' +
+        '</svg>';
+      const g1f = retired ? 0 : Math.max(0, Math.min(1, r.countdownYears / 40));
+      g1El.innerHTML = gaugeHTML(80, 70, 62, g1f, retired ? '已退休' : r.countdownYears.toFixed(1) + ' 年', '距法定退休', '#4f46e5');
+      const g2f = Math.max(0, Math.min(1, r.payYears / r.minPayYears));
+      g2El.innerHTML = gaugeHTML(80, 70, 62, g2f, r.payYears + ' 年', '缴费年限 / 需 ' + r.minPayYears, '#059669');
+      let html = '<strong>政策时钟解读</strong><br/>';
+      html += '按渐进式延迟退休政策，延迟档位 <strong>+' + r.delayMonths + ' 个月</strong>，法定退休年龄 ' +
+        r.statutoryAge.y + '岁' + (r.statutoryAge.m ? r.statutoryAge.m + '个月' : '') + '。';
+      flexVal.textContent = flexV === 0 ? '法定退休' : (flexV > 0 ? '延迟 ' + Math.abs(flexV) + ' 个月' : '提前 ' + Math.abs(flexV) + ' 个月');
+      if (r.clamped) html += '<span style="color:#e11d48">弹性档位超出合法区间，已自动钳制（提前不得低于原法定年龄，延迟最多 3 年）。</span>';
+      html += r.payYears >= r.minPayYears
+        ? '预计缴费 ' + r.payYears + ' 年，<strong style="color:#059669">满足</strong>最低 ' + r.minPayYears + ' 年要求。'
+        : '预计缴费 ' + r.payYears + ' 年，<strong style="color:#e11d48">不足</strong>最低 ' + r.minPayYears + ' 年，需延长缴费或补足。';
+      html += '弹性提前退休会同步减少缴费年限与个人账户积累，星图「家庭现金流」节点将联动重算。';
+      noteEl.innerHTML = '<summary>政策时钟解读（点击展开）</summary>' + html;
+      update('retirement', r);
+    }
+    [birth, type, start, flex].forEach(inp => {
+      inp.addEventListener('change', calc);
+      inp.addEventListener('input', calc);
+    });
+    calcBtn.addEventListener('click', calc);
+    calc();
+    this._dispose = () => {};
+  },
+  unmount() { if (this._dispose) this._dispose(); }
+};
+
+__lx_exp["retirement"] = retirement;
+};
+__mods["js/modules/starmapView.js"] = function(__lx_req, __lx_exp){
+// 模块2/7/8：星图宇宙 · 关系引力场 · 阻尼与反弹波
+// 交互升级（依据 LifeVerse_Interaction_Spec_v1）：
+//  - 点星体 → 扇形决策菜单 → 真 castRipple（P0 · 规格 8.1 / 附录A）
+//  - 关系编辑模式：拖星体改边权（P1 · 规格 8.2）
+//  - 长按连线 → 阻尼滑条（P1 · 规格 8.3）
+//  - 星图 / 时间轴 三视图切换（P0 · 规格 9），共享 nodes/links/probeYear
+// 算法不重写：仅消费 castRipple / links，不碰 DECAY 与衰减公式。
+const { el } = __lx_req("js/utils/dom.js");
+const { fitCanvas, fitCanvasFlex, rafLoop, onResize } = __lx_req("js/utils/canvas.js");
+const { Sound } = __lx_req("js/engines/audio.js");
+const { NODES, LINKS, DECAY, nodeById, castRipple, SCENES } = __lx_req("js/engines/starmap.js");
+const { describeEffect, describeRebound, lookupRule, RULE_PACKS, DOMAIN_COLORS } = __lx_req("js/engines/rulebase.js");
+const { update, getState, subscribe } = __lx_req("js/store.js");
+// 扇形决策菜单项（规格附录 A；ruleId 映射到 rulebase 分域卡包）
+const DECISIONS = [
+  { text: '换工作',    ruleId: 'career.switch', impact: 0.75, need: null },
+  { text: '搬家/换城', ruleId: 'social.relocate', impact: 0.60, need: null },
+  { text: '结婚/分手', ruleId: 'family.bond',  impact: 0.80, need: 'injected' },
+  { text: '进修',      ruleId: 'career.study',  impact: 0.45, need: null },
+  { text: '生育',      ruleId: 'family.child',  impact: 0.85, need: 'injected' },
+  { text: '创业',      ruleId: 'career.found',  impact: 0.90, need: null }
+];
+
+const starmapView = {
+  id: 'starmap',
+  title: '星图宇宙 · 关系引力场',
+  subtitle: '点星体弹出扇形决策；拖「关系编辑」改强弱；长按连线调阻尼。手势先于菜单',
+  mount(root) {
+    const canvas = el('canvas', { id: 'starmapCanvas', class: 'mod-canvas' });
+    const log = el('div', { class: 'ripple-log', id: 'rippleLog' });
+    const toolbar = el('div', { class: 'starmap-toolbar' }, [
+      el('button', { class: 'dynasty-tab', 'data-scene': 'career', text: '转行 AI 产品经理' }),
+      el('button', { class: 'dynasty-tab', 'data-scene': 'retire', text: '延迟退休 3 年' }),
+      el('button', { class: 'dynasty-tab', 'data-scene': 'spouse', text: '配偶收入下降 30%' })
+    ]);
+    const relinkBtn = el('button', { class: 'dyn-btn', id: 'relinkBtn', text: '✥ 关系编辑' });
+    const secretBtn = el('button', { class: 'dyn-btn', id: 'secretBtn', text: '🔒 秘密边' });
+    const viewSeg = el('div', { class: 'view-seg' }, [
+      el('button', { class: 'view-opt active', 'data-view': 'map', text: '星图' }),
+      el('button', { class: 'view-opt', 'data-view': 'timeline', text: '时间轴' })
+    ]);
+    const legend = el('div', { class: 'legend', html:
+      '<span><i class="st-core"></i>核心</span>' +
+      '<span><i class="st-inf"></i>已受影响</span>' +
+      '<span><i class="st-pot"></i>潜力（待触发）</span>' +
+      '<span><i class="st-conf"></i>冲突（高阻尼）</span>' });
+    const fanMenu = el('div', { class: 'fan-menu', id: 'fanMenu' });
+    const dampBox = el('div', { class: 'damp-box', id: 'dampBox' });
+    const wrap = el('div', { class: 'starmap-canvas-wrap' }, [canvas, fanMenu, dampBox]);
+    const stage = el('div', { class: 'starmap-stage' }, [
+      el('div', { class: 'starmap-head' }, [toolbar, relinkBtn, secretBtn, viewSeg, legend]),
+      wrap,
+      log
+    ]);
+    root.appendChild(stage);
+
+    const ctx = canvas.getContext('2d');
+    let W, H, viewMode = 'map', relinkMode = false;
+    let ripples = [], pulses = [], dragging = null, dragOffset = { x: 0, y: 0 }, moved = false;
+    let fanNode = null, lpTimer = null, pressNode = null, downPos = { x: 0, y: 0 }, downEdge = -1, cloneCnt = 0;
+    let secretMode = false, secretFirst = null;
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const nodes = NODES.map(n => ({ ...n }));
+    const links = LINKS.map(l => l.slice());
+    // 用 store 中已调整的阻尼覆盖（跨会话保留）
+    (getState().edgeResistance || {}); // 预留
+
+    function nodeById2(id) { for (const n of nodes) if (n.id === id) return n; return null; }
+    function edgeKey(a, b) { return [a, b].sort().join('|'); }
+    // 星体状态色标（L1 · 三.3）：核心 / 已受影响 / 潜力 / 冲突
+    const STATE_COLOR = { core: '#4f46e5', influenced: '#0ea5e9', potential: '#d97706', conflict: '#e11d48' };
+    function nodeState(n) {
+      for (const lk of links) {
+        if ((lk[0] === n.id || lk[1] === n.id) && lk[3] >= 0.5) return 'conflict';
+      }
+      if (affected.has(n.id)) return 'influenced';
+      if (n.tier === 0) return 'core';
+      return 'potential';
+    }
+
+    function layout() {
+      const cx = W / 2, cy = H / 2;
+      if (viewMode === 'timeline') {
+        const pad = 70, span = W - pad * 2, tiers = 4;
+        const perTier = {}, idx = {};
+        nodes.forEach(n => { perTier[n.tier] = (perTier[n.tier] || 0) + 1; });
+        nodes.forEach(n => {
+          idx[n.tier] = idx[n.tier] || 0;
+          const colX = pad + (n.tier / (tiers - 1)) * span;
+          const cnt = perTier[n.tier], k = idx[n.tier];
+          const spread = (k - (cnt - 1) / 2) * 46;
+          n.x = n.tier === 0 ? cx : colX;
+          n.y = cy + (n.tier === 0 ? 0 : spread);
+          idx[n.tier]++;
+        });
+        return;
+      }
+      const tierR = [0, Math.min(W, H) * 0.20, Math.min(W, H) * 0.33, Math.min(W, H) * 0.44];
+      const tierCount = {}, tierIdx = {};
+      nodes.forEach(n => tierCount[n.tier] = (tierCount[n.tier] || 0) + 1);
+      nodes.forEach(n => {
+        if (n.tier === 0) { n.x = cx; n.y = cy; return; }
+        tierIdx[n.tier] = tierIdx[n.tier] || 0;
+        const angle = (tierIdx[n.tier] / tierCount[n.tier]) * Math.PI * 2 - Math.PI / 2 + n.tier * 0.5;
+        n.x = cx + Math.cos(angle) * tierR[n.tier];
+        n.y = cy + Math.sin(angle) * tierR[n.tier];
+        tierIdx[n.tier]++;
+      });
+    }
+    function resize() {
+      const f = fitCanvasFlex(canvas);
+      W = f.W; H = f.H; ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
+      layout();
+    }
+
+    let breath = 0, affected = new Set();
+    function draw() {
+      breath += 0.02;
+      const lr = getState().lastRipple;
+      affected = new Set(lr && lr.results ? lr.results.map(r => r.to) : []);
+      ctx.clearRect(0, 0, W, H);
+      // 时间轴视图：当前探针年份竖线
+      if (viewMode === 'timeline') {
+        const py = getState().settings.probeYear || 2026;
+        const mx = 70 + ((py - 2026) / 10) * (W - 140);
+        ctx.strokeStyle = 'rgba(14,165,233,0.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(mx, 30); ctx.lineTo(mx, H - 30); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#0ea5e9'; ctx.font = '600 11px -apple-system,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('探针 ' + py, mx, 22);
+      }
+      links.forEach(lk => {
+        const a = nodeById2(lk[0]), b = nodeById2(lk[1]);
+        const hi = lk[3] >= 0.5;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y);
+        let mx, my;
+        if (viewMode === 'timeline') { mx = (a.x + b.x) / 2; my = (a.y + b.y) / 2; }
+        else { mx = (a.x + b.x) / 2; my = (a.y + b.y) / 2 - 18; }
+        ctx.quadraticCurveTo(mx, my, b.x, b.y);
+        ctx.strokeStyle = hi
+          ? 'rgba(225,29,72,' + (0.22 + lk[2] * 0.22).toFixed(2) + ')'
+          : 'rgba(79,70,229,' + (0.10 + lk[2] * 0.22).toFixed(2) + ')';
+        ctx.lineWidth = 0.6 + lk[2] * 2.2; ctx.stroke();
+      });
+      // 秘密边：仅自己可见的虚线（脱敏，涟漪可走但日志不展开）
+      (getState().secrets || []).forEach(s => {
+        const a = nodeById2(s.from), b = nodeById2(s.to);
+        if (!a || !b) return;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = 'rgba(124,58,237,0.45)'; ctx.lineWidth = 1.2; ctx.setLineDash([2, 4]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(124,58,237,0.7)'; ctx.font = '10px -apple-system,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('密', (a.x + b.x) / 2, (a.y + b.y) / 2 - 3);
+      });
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const p = pulses[i]; p.t += 0.025;
+        if (p.t >= 1) { pulses.splice(i, 1); continue; }
+        const a = nodeById2(p.from), b = nodeById2(p.to);
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - 18;
+        const t = p.t, it = 1 - t;
+        const px = it * it * a.x + 2 * it * t * mx + t * t * b.x;
+        const py = it * it * a.y + 2 * it * t * my + t * t * b.y;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(217,119,6,0.85)'; ctx.fill();
+      }
+      for (let j = ripples.length - 1; j >= 0; j--) {
+        const rp = ripples[j];
+        rp.r += rp.echo ? 1.2 : 1.6; rp.alpha -= 0.008;
+        if (rp.alpha <= 0 || rp.r > rp.max) { ripples.splice(j, 1); continue; }
+        ctx.beginPath(); ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+        ctx.strokeStyle = rp.echo
+          ? 'rgba(225,29,72,' + rp.alpha.toFixed(3) + ')'
+          : 'rgba(79,70,229,' + rp.alpha.toFixed(3) + ')';
+        ctx.lineWidth = rp.echo ? 2.2 : 1.5; ctx.stroke();
+      }
+      nodes.forEach(n => {
+        if (fanNode && n.id === fanNode.id) {
+          ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 10, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(79,70,229,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+        }
+        const glow = n.tier === 0 ? 6 + Math.sin(breath) * 2 : 3;
+        const col = STATE_COLOR[nodeState(n)];
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r + glow, 0, Math.PI * 2);
+        ctx.fillStyle = col + '22'; ctx.fill();
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = col; ctx.fill();
+        // 状态微环（L1.5 真切换）：冲突=红色脉动，受影响=青色，潜力=琥珀，核心=靛
+        const st = nodeState(n);
+        if (st !== 'core') {
+          ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 4, 0, Math.PI * 2);
+          ctx.strokeStyle = col + (st === 'conflict' ? 'cc' : '99');
+          ctx.lineWidth = st === 'conflict' ? 2.2 : 1.4;
+          if (st === 'conflict') { ctx.setLineDash([3, 3]); ctx.globalAlpha = 0.6 + Math.sin(breath * 2) * 0.3; }
+          ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = '#1a1d2e'; ctx.font = '600 11px -apple-system,"PingFang SC",sans-serif';
+        ctx.textAlign = 'center'; ctx.fillText(n.label, n.x, n.y + n.r + 16);
+      });
+    }
+
+    function cast(sourceId, eventName, baseImpact, ruleId) {
+      log.innerHTML = '';
+      const src = nodeById2(sourceId);
+      ripples.push({ x: src.x, y: src.y, r: src.r, max: Math.min(W, H) * 0.55, alpha: 0.55, echo: false });
+      Sound.ripple(0);
+      const yr = getState().settings.probeYear || 2026;
+      narrate('在「' + (src.label || '') + '」投下决策「' + eventName + '」，涟漪向关联星体扩散。');
+      const { results } = castRipple(sourceId, baseImpact, links);
+      const head = el('div', { class: 'rl-item rl-story' });
+      head.innerHTML = '<span class="rl-tag" style="background:var(--accent-light);color:var(--accent)">' + yr + ' 年</span>' +
+        '<strong>' + eventName + '</strong>（影响强度 ' + baseImpact.toFixed(2) + '）';
+      log.appendChild(head);
+      const record = { source: sourceId, name: eventName, impact: baseImpact, ruleId: ruleId || null, results: [], year: yr };
+      let frictionCount = 0;
+      results.forEach((r, idx) => {
+        setTimeout(() => {
+          pulses.push({ from: r.from, to: r.to, t: 0 });
+          const tn = nodeById2(r.to);
+          setTimeout(() => ripples.push({ x: tn.x, y: tn.y, r: tn.r, max: 90, alpha: 0.45, echo: false }), 350);
+          let friction = '';
+          if (r.resistance >= 0.5) {
+            frictionCount++;
+            friction = ' <span class="rl-friction">⚠ 反弹</span>';
+            setTimeout(() => ripples.push({ x: tn.x, y: tn.y, r: tn.r, max: 70, alpha: 0.5, echo: true }), 600);
+            Sound.echo();
+          }
+          const story = r.resistance >= 0.5 ? describeRebound(r.from, r.to, r.impact, r.resistance) : (nodeById2(r.from).label + ' → ' + tn.label + '：' + describeEffect(r.to, r.impact));
+          const item = el('div', { class: 'rl-item rl-story' });
+          item.innerHTML = '<span class="rl-tag" style="background:rgba(217,119,6,0.10);color:#d97706">第' + r.depth + '圈</span>' + story + friction;
+          log.appendChild(item);
+          log.scrollTop = log.scrollHeight;
+          record.results.push(r);
+        }, idx * 420);
+      });
+      update('lastRipple', record);
+      const dec = (getState().decisions || []).concat([{ source: sourceId, name: eventName, impact: baseImpact, ruleId: ruleId || null, at: Date.now(), year: yr, rebound: frictionCount > 0 }]);
+      update('decisions', dec);
+      // 决策钉：写入 markers，供探针轨道识别
+      const markers = (getState().markers || []).filter(m => !(m.type === 'decision' && m.label === eventName && m.year === yr));
+      markers.push({ year: yr, type: 'decision', label: eventName });
+      update('markers', markers);
+      if (frictionCount > 0) update('frictionUnresolved', (getState().frictionUnresolved || 0) + frictionCount);
+    }
+
+    // ===== 扇形决策菜单（情境卡） =====
+    function openFan(node) {
+      closeFan();
+      fanNode = node;
+      fanMenu.style.display = 'block';
+      const R = 78;
+      const stt = getState();
+      DECISIONS.forEach((d, i) => {
+        const rule = lookupRule(d.ruleId) || { reach: 2, risk: '低' };
+        const unlocked = !d.need || (d.need === 'injected' && stt.profile.injected);
+        const ang = -Math.PI / 2 + i * (Math.PI * 2 / DECISIONS.length);
+        const item = el('button', { class: 'fan-item' + (unlocked ? '' : ' fan-locked') });
+        item.style.left = (node.x + Math.cos(ang) * R) + 'px';
+        item.style.top = (node.y + Math.sin(ang) * R) + 'px';
+        item.innerHTML = '<span class="fi-main">' + d.text + '</span>' +
+          '<span class="fi-sub">' + (unlocked ? ('预计波及 ' + rule.reach + ' 人 · 摩擦风险 ' + rule.risk) : '需先注入星云解锁') + '</span>';
+        item.title = '影响强度 ' + d.impact.toFixed(2);
+        if (unlocked) item.addEventListener('click', (e) => { e.stopPropagation(); cast(node.id, d.text, d.impact, d.ruleId); closeFan(); });
+        else item.addEventListener('click', (e) => { e.stopPropagation(); narrate('「' + d.text + '」需先到星云模块注入质能解锁。'); });
+        fanMenu.appendChild(item);
+      });
+    }
+    function closeFan() { fanNode = null; fanMenu.style.display = 'none'; fanMenu.innerHTML = ''; }
+
+    // ===== 阻尼滑条 =====
+    function openDamp(edgeIdx) {
+      closeDamp();
+      const lk = links[edgeIdx];
+      const a = nodeById2(lk[0]), b = nodeById2(lk[1]);
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      dampBox.style.display = 'block';
+      dampBox.style.left = mx + 'px';
+      dampBox.style.top = my + 'px';
+      dampBox.innerHTML = '';
+      const title = el('div', { class: 'damp-title', text: a.label + '—' + b.label });
+      const slider = el('input', { type: 'range', class: 'damp-range', min: '0', max: '1', step: '0.05', value: String(lk[3]) });
+      const val = el('div', { class: 'damp-val', text: '阻尼 ' + (lk[3] * 100).toFixed(0) + '%' + (lk[3] >= 0.5 ? ' · 将反弹' : '') });
+      slider.addEventListener('input', () => {
+        const v = parseFloat(slider.value);
+        links[edgeIdx][3] = v;
+        val.textContent = '阻尼 ' + (v * 100).toFixed(0) + '%' + (v >= 0.5 ? ' · 将反弹' : '');
+        val.style.color = v >= 0.5 ? '#e11d48' : '#6b7280';
+        const k = edgeKey(lk[0], lk[1]);
+        const map = Object.assign({}, getState().edgeResistance); map[k] = v;
+        update('edgeResistance', map);
+      });
+      const close = el('button', { class: 'damp-close', text: '✕' });
+      close.addEventListener('click', (e) => { e.stopPropagation(); closeDamp(); });
+      dampBox.appendChild(title); dampBox.appendChild(slider); dampBox.appendChild(val); dampBox.appendChild(close);
+    }
+    function closeDamp() { dampBox.style.display = 'none'; dampBox.innerHTML = ''; }
+
+    // ===== 命中检测 =====
+    function hitNode(mx, my) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        if (Math.hypot(mx - n.x, my - n.y) <= (n.r + 10)) return n;
+      }
+      return null;
+    }
+    function nearestEdge(mx, my) {
+      let best = -1, bestD = 9;
+      links.forEach((lk, i) => {
+        const a = nodeById2(lk[0]), b = nodeById2(lk[1]);
+        const d = distToSeg(mx, my, a.x, a.y, b.x, b.y);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      return best;
+    }
+    function distToSeg(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy;
+      if (l2 === 0) return Math.hypot(px - x1, py - y1);
+      let t = ((px - x1) * dx + (py - y1) * dy) / l2; t = Math.max(0, Math.min(1, t));
+      return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+    }
+    function evtPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+    function relinkWeights(node) {
+      const me = nodeById2('me');
+      const d = Math.hypot(node.x - me.x, node.y - me.y);
+      const dMax = Math.min(W, H) * 0.5;
+      const w = Math.max(0.05, Math.min(1, 1 - d / dMax));
+      links.forEach(lk => {
+        if ((lk[0] === node.id && lk[1] === 'me') || (lk[1] === node.id && lk[0] === 'me')) lk[2] = w;
+      });
+    }
+
+    // ===== 指针交互 =====
+    canvas.addEventListener('pointerdown', e => {
+      const pos = evtPos(e);
+      downPos = pos; moved = false; downEdge = -1;
+      if (fanNode) { closeFan(); return; } // 扇形外点击关闭
+      const n = hitNode(pos.x, pos.y);
+      if (n && e.ctrlKey) {
+        const clone = { id: n.id + '_c' + (cloneCnt++), x: n.x + 34, y: n.y + 34, r: n.r, tier: n.tier, label: n.label + '·副本' };
+        nodes.push(clone); links.push(['me', clone.id, 0.5, 0.3]);
+        Sound.gravity(); narrate('已复制星体（Ctrl+拖拽）· 副本为可视化演示。'); return;
+      }
+      if (n) {
+        pressNode = n; dragging = n;
+        dragOffset.x = pos.x - n.x; dragOffset.y = pos.y - n.y;
+        canvas.setPointerCapture(e.pointerId);
+        return;
+      }
+      // 空白处：检测最近连线，启动长按阻尼
+      downEdge = nearestEdge(pos.x, pos.y);
+      if (downEdge >= 0) {
+        lpTimer = setTimeout(() => { openDamp(downEdge); lpTimer = null; }, 400);
+      }
+    });
+    canvas.addEventListener('pointermove', e => {
+      const pos = evtPos(e);
+      if (Math.hypot(pos.x - downPos.x, pos.y - downPos.y) > 8 && lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+      if (!dragging) return;
+      dragging.x = pos.x - dragOffset.x; dragging.y = pos.y - dragOffset.y; moved = true;
+      if (relinkMode) relinkWeights(dragging);
+    });
+    canvas.addEventListener('pointerup', e => {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+      if (dragging && !moved && !relinkMode) {
+        if (secretMode) {
+          if (!secretFirst) { secretFirst = dragging; narrate('已选起点「' + dragging.label + '」，再点一个星体完成秘密边。'); }
+          else if (secretFirst !== dragging) {
+            const secrets = (getState().secrets || []).concat([{ from: secretFirst.id, to: dragging.id, label: secretFirst.label + '↔' + dragging.label }]);
+            update('secrets', secrets);
+            narrate('已建立秘密边：' + secretFirst.label + ' ↔ ' + dragging.label + '（仅自己可见）');
+            Sound.gravity(); secretFirst = null;
+          }
+        } else {
+          openFan(dragging); // 轻点=扇形决策
+        }
+      }
+      dragging = null; pressNode = null;
+    });
+    canvas.addEventListener('pointercancel', () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } dragging = null; });
+
+    // ===== 工具栏 =====
+    toolbar.querySelectorAll('.dynasty-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        toolbar.querySelectorAll('.dynasty-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const sc = SCENES[tab.getAttribute('data-scene')];
+        if (sc) cast(sc.source, sc.name, sc.impact, sc.source);
+      });
+    });
+    relinkBtn.addEventListener('click', () => {
+      relinkMode = !relinkMode;
+      relinkBtn.classList.toggle('active', relinkMode);
+      relinkBtn.textContent = relinkMode ? '✥ 关系编辑（开）' : '✥ 关系编辑';
+    });
+    secretBtn.addEventListener('click', () => {
+      secretMode = !secretMode; secretFirst = null;
+      secretBtn.classList.toggle('active', secretMode);
+      secretBtn.textContent = secretMode ? '🔒 秘密边（开）' : '🔒 秘密边';
+      narrate(secretMode ? '秘密边模式：依次点击两个星体，建立一条仅自己可见的虚线边。' : '已退出秘密边模式。');
+    });
+    viewSeg.querySelectorAll('.view-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        viewSeg.querySelectorAll('.view-opt').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        viewMode = opt.getAttribute('data-view');
+        layout();
+      });
+    });
+
+    const offResize = onResize(resize);
+    resize();
+    const loop = rafLoop(draw);
+    // 注册全局涟漪触发（供快捷键空格 / 语音指令调用）
+    window.LTApp.starmapRipple = () => {
+      const src = nodes[1 + Math.floor(Math.random() * (nodes.length - 1))];
+      cast(src.id, '全局决策石子', 0.72, null);
+    };
+    this._dispose = () => { loop.stop(); offResize(); if (lpTimer) clearTimeout(lpTimer); };
+  },
+  unmount() { if (this._dispose) this._dispose(); window.LTApp.starmapRipple = null; }
+};
+
+__lx_exp["starmapView"] = starmapView;
+};
+__mods["js/modules/twin.js"] = function(__lx_req, __lx_exp){
+// 模块3：双生时空剪影 · 跨时空共振 + 结构相似度向量矩阵
+const { el } = __lx_req("js/utils/dom.js");
+const { fitCanvas, fitCanvasFlex, rafLoop, onResize } = __lx_req("js/utils/canvas.js");
+const { buildReferences, similarity, DIMS } = __lx_req("js/engines/vectorMatrix.js");
+const { update, getState } = __lx_req("js/store.js");
+// 配对：从用户 dilemma + 行业动态生成 5–7 对（每对含竹简文案 + 结构同构点关键词）
+function buildPairs(st) {
+  const ind = (st.profile.industry || '').indexOf('互联网') >= 0;
+  const fear = (st.profile.dilemma || '') + ' ' + (st.profile.fearSeed || '');
+  const base = [
+    { m: '技能贬值', a: '技艺贬值', tip: '竹简：「江南新闸至，旧艺渐废。」——技能贬值的结构同源。', homo: ['技能', '贬值', '结构同源'] },
+    { m: '转型成本', a: '学艺成本', tip: '竹简：「离岗半岁，无俸而学。」——转型机会成本的结构同源。', homo: ['转型', '成本', '机会成本'] },
+    { m: '周期下行', a: '漕运缩减', tip: '竹简：「漕损三成，吏员冗。」——行业周期下行的结构同源。', homo: ['周期', '下行', '行业'] }
+  ];
+  const extra = [];
+  if (ind) extra.push({ m: '算法替代', a: '活字取代抄工', tip: '竹简：「活字既出，抄工散。」——技术替代人力的结构同源。', homo: ['替代', '技术', '人力'] });
+  if (/停滞|瓶颈|晋升/.test(fear)) extra.push({ m: '晋升见顶', a: '科举不第', tip: '竹简：「十试不第，门第自守。」——上升通道收窄的结构同源。', homo: ['晋升', '通道', '收窄'] });
+  if (/关系|家庭|张力/.test(fear)) extra.push({ m: '关系张力', a: '门第倾轧', tip: '竹简：「内闱失和，外事难成。」——关系张力的结构同源。', homo: ['关系', '张力', '内耗'] });
+  extra.push({ m: '身体告警', a: '劳疾早逝', tip: '竹简：「积劳成疾，未老先衰。」——健康透支的结构同源。', homo: ['身体', '透支', '健康'] });
+  return base.concat(extra).slice(0, 7);
+}
+
+const twin = {
+  id: 'twin',
+  title: '双生时空剪影',
+  subtitle: '左现代科技星轨 / 右古代金石星轨，悬停触发「跨时空共振」光束；右侧实时计算结构相似度',
+  mount(root) {
+    const PAIRS = buildPairs(getState());
+    // 竹简卷轴（共振命中后从底部升起）
+    const scroll = el('div', { class: 'twin-scroll', id: 'twinScroll' });
+    const canvas = el('canvas', { id: 'twinCanvas', class: 'mod-canvas' });
+    const tip = el('p', { class: 'hint', id: 'twinTip', text: '悬停左侧现代节点，触发与右侧古代角色的「跨时空共振」光束。' });
+    const pills = PAIRS.map((p, i) =>
+      el('button', { class: 'reso-pill', 'data-pair': i, text: (i + 1) + '. ' + p.m + ' ↔ ' + p.a }));
+
+    // 向量矩阵面板
+    const sliderDefs = [
+      { key: 0, label: DIMS[0], val: 0.7 },
+      { key: 1, label: DIMS[1], val: 0.8 },
+      { key: 2, label: DIMS[2], val: 0.5 }
+    ];
+    const userVec = [0.7, 0.8, 0.5];
+    const refs = buildReferences(userVec);
+    const matrixRows = refs.map(r =>
+      el('div', { class: 'matrix-row', 'data-name': r.name }, [
+        el('span', { class: 'mx-name', text: r.name }),
+        el('span', { class: 'mx-val', text: (r.cosine * 100).toFixed(1) + '%' })
+      ]));
+    const sliders = sliderDefs.map(d => {
+      const s = el('input', { type: 'range', min: '0', max: '100', value: String(Math.round(d.val * 100)), class: 'mx-slider' });
+      s.addEventListener('input', () => {
+        userVec[d.key] = parseInt(s.value, 10) / 100;
+        const live = refs.map(r => similarity(userVec, r.vec));
+        matrixRows.forEach((row, i) => {
+          row.querySelector('.mx-val').textContent = (live[i] * 100).toFixed(1) + '%';
+        });
+        update('twinPicks', live.map((v, i) => ({ name: refs[i].name, sim: v })));
+      });
+      return el('div', { class: 'mx-slider-row' }, [
+        el('label', { text: d.label }),
+        s
+      ]);
+    });
+
+    const divider = el('div', { class: 'twin-divider', id: 'twinDivider' });
+    const stage = el('div', { class: 'twin-stage' }, [
+      el('div', { class: 'twin-canvas-wrap' }, [canvas, tip, divider, scroll, el('div', { class: 'reso-pills' }, pills)]),
+      el('div', { class: 'vec-matrix' }, [
+        el('h4', { text: '结构相似度向量矩阵' }),
+        el('p', { class: 'muted', text: '三维结构向量 → 余弦相似度。调节滑块实时匹配历史周期。' }),
+        ...sliders,
+        el('div', { class: 'matrix' }, matrixRows)
+      ])
+    ]);
+    root.appendChild(stage);
+
+    const ctx = canvas.getContext('2d');
+    let W, H, mNodes = [], aNodes = [];
+    let active = -1, hover = -1, beamT = 0, dividerFrac = 0.5;
+    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+
+    function layoutNodes() {
+      const top = 64, gap = (H - 128) / 2;
+      const leftX = W * dividerFrac * 0.5;
+      const rightX = W * dividerFrac + (W * (1 - dividerFrac)) * 0.5;
+      mNodes = []; aNodes = [];
+      for (let i = 0; i < 3; i++) {
+        mNodes.push({ x: leftX, y: top + i * gap, label: PAIRS[i].m });
+        aNodes.push({ x: rightX, y: top + i * gap, label: PAIRS[i].a });
+      }
+    }
+    function resize() {
+      const f = fitCanvasFlex(canvas);
+      W = f.W; H = f.H; ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
+      layoutNodes();
+    }
+    function drawTrack(nodes, color, glow) {
+      ctx.beginPath();
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        if (i === 0) ctx.moveTo(n.x, n.y);
+        else {
+          const px = nodes[i - 1].x, py = nodes[i - 1].y;
+          const mx = (px + n.x) / 2, my = (py + n.y) / 2 - 10;
+          ctx.quadraticCurveTo(mx, my, n.x, n.y);
+        }
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+      const isModern = color === '#0ea5e9';
+      nodes.forEach(n => {
+        ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = color; ctx.fill();
+        if (glow > 0) {
+          ctx.save(); ctx.globalAlpha = 0.3;
+          ctx.beginPath(); ctx.arc(n.x, n.y, 5 + glow, 0, Math.PI * 2);
+          ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.restore();
+        }
+        ctx.fillStyle = isModern ? '#0369a1' : '#5b5346';
+        ctx.font = '12px -apple-system,"PingFang SC",sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(n.label, n.x, n.y + (isModern ? -12 : 18));
+      });
+    }
+    function draw() {
+      beamT += 0.03; if (beamT > 1) beamT = 0;
+      ctx.clearRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.font = '600 13px -apple-system,"PingFang SC",sans-serif';
+      ctx.fillStyle = '#0369a1'; ctx.fillText('现代 · 科技星轨', W * 0.26, 34);
+      ctx.fillStyle = '#7c5a2e'; ctx.fillText('古代 · 金石星轨', W * 0.74, 34);
+      const dividerX = W * dividerFrac;
+      const collapsedA = dividerFrac < 0.2, collapsedM = dividerFrac > 0.8;
+      ctx.beginPath(); ctx.moveTo(dividerX, 40); ctx.lineTo(dividerX, H - 20);
+      ctx.strokeStyle = 'rgba(120,120,140,0.25)'; ctx.setLineDash([4, 5]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+      if (!collapsedM) drawTrack(mNodes, '#0ea5e9', (hover === 0 || active === 0) ? 4 : 0);
+      if (!collapsedA) drawTrack(aNodes, '#8a6d3b', (hover === 1 || active === 1) ? 4 : 0);
+      const idx = hover >= 0 ? hover : active;
+      if (idx >= 0 && !collapsedM && !collapsedA) {
+        const m = mNodes[idx], a = aNodes[idx];
+        const mx = (m.x + a.x) / 2, my = (m.y + a.y) / 2;
+        ctx.beginPath(); ctx.moveTo(m.x, m.y);
+        ctx.quadraticCurveTo(mx, my - 40, a.x, a.y);
+        ctx.strokeStyle = 'rgba(217,119,6,0.55)'; ctx.lineWidth = 2; ctx.stroke();
+        const t = beamT, it = 1 - t;
+        const px = it * it * m.x + 2 * it * t * mx + t * t * a.x;
+        const py = it * it * m.y + 2 * it * t * (my - 40) + t * t * a.y;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fillStyle = '#d97706'; ctx.fill();
+        ctx.beginPath(); ctx.arc(a.x, a.y, 6 + Math.sin(beamT * Math.PI * 2) * 4 + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(217,119,6,0.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+    }
+    function setActive(i) {
+      active = i;
+      pills.forEach(p => p.classList.remove('active'));
+      if (i >= 0) {
+        const p = root.querySelector('.reso-pill[data-pair="' + i + '"]');
+        if (p) p.classList.add('active');
+        tip.textContent = PAIRS[i].tip;
+        // 竹简卷轴升起：3–4 句含「结构同构点」高亮词
+        const homo = PAIRS[i].homo || [PAIRS[i].m, PAIRS[i].a];
+        const hl = (s) => homo.reduce((acc, w) => acc.split(w).join('<b class="homo">' + w + '</b>'), s);
+        const lines = [
+          '现代侧「' + PAIRS[i].m + '」与古代「' + PAIRS[i].a + '」在结构上遥相呼应。',
+          hl('二者皆受制于同样的' + homo[0] + '约束，' + homo[1] + '只是表象。'),
+          hl('你的应对越贴近「' + homo[0] + '」的主动管理，共振越偏向顺行而非被裹挟。'),
+          '竹简原文：' + PAIRS[i].tip.replace(/^竹简：「|」——.*$/g, '')
+        ];
+        scroll.innerHTML = '<div class="scroll-inner"><div class="scroll-head">⟡ 结构同构 · 史鉴卷</div>' +
+          lines.map(l => '<p class="scroll-line">' + l + '</p>').join('') + '</div>';
+        scroll.classList.add('show');
+        // 相似度 > 阈值自动封存为史鉴
+        const sims = getState().twinPicks || [];
+        if (sims.length && Math.max(...sims.map(s => s.sim)) > 0.8) {
+          const mk = (getState().markers || []).filter(m => m.type !== 'history');
+          mk.push({ year: getState().settings.probeYear || 2026, type: 'history', label: '史鉴封存：' + PAIRS[i].m });
+          update('markers', mk);
+        }
+      } else {
+        tip.textContent = '悬停左侧现代节点，触发与右侧古代角色的「跨时空共振」光束。';
+        scroll.classList.remove('show');
+      }
+    }
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      let found = -1;
+      for (let i = 0; i < mNodes.length; i++) {
+        if (Math.hypot(mx - mNodes[i].x, my - mNodes[i].y) <= 16) { found = i; break; }
+      }
+      if (found >= 0) { hover = found; setActive(found); }
+      else if (active < 0) hover = -1;
+    });
+    canvas.addEventListener('mouseleave', () => { hover = -1; if (active < 0) setActive(-1); });
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      for (let i = 0; i < mNodes.length; i++) {
+        if (Math.hypot(mx - mNodes[i].x, my - mNodes[i].y) <= 16) { setActive(i); break; }
+      }
+    });
+    pills.forEach(p => p.addEventListener('click', () => setActive(parseInt(p.getAttribute('data-pair'), 10))));
+
+    // 分屏分割线拖拽（L1 · 二.3）
+    divider.style.left = (dividerFrac * 100) + '%';
+    let draggingDiv = false;
+    divider.addEventListener('dblclick', () => {
+      dividerFrac = 0.5; divider.style.left = '50%'; layoutNodes();
+      narrate('双生分割线已复位到 50%。');
+    });
+    divider.addEventListener('pointerdown', e => { e.preventDefault(); draggingDiv = true; divider.setPointerCapture(e.pointerId); });
+    divider.addEventListener('pointermove', e => {
+      if (!draggingDiv) return;
+      const r = canvas.getBoundingClientRect();
+      let f = Math.max(0.12, Math.min(0.88, (e.clientX - r.left) / r.width));
+      // 吸附 30/50/70
+      [0.3, 0.5, 0.7].forEach(s => { if (Math.abs(f - s) < 0.035) f = s; });
+      dividerFrac = f;
+      divider.style.left = (dividerFrac * 100) + '%';
+      layoutNodes();
+    });
+    divider.addEventListener('pointerup', () => {
+      if (!draggingDiv) return;
+      draggingDiv = false;
+      const mPct = Math.round(dividerFrac * 100), aPct = Math.round((1 - dividerFrac) * 100);
+      let extra = '';
+      if (dividerFrac <= 0.15) extra = ' · 单纪显现：你正完全沉浸于现代科技星轨，古代金石渐隐。';
+      else if (dividerFrac >= 0.85) extra = ' · 单纪显现：你正完全沉浸于古代金石星轨，现代烟火渐隐。';
+      else if ([0.3, 0.5, 0.7].includes(dividerFrac)) extra = ' · 已吸附到 ' + Math.round(dividerFrac * 100) + '% 锚点。';
+      narrate('双生分屏 · 现代 ' + mPct + '% / 古代 ' + aPct + '%' + extra);
+    });
+
+    const offResize = onResize(resize);
+    resize();
+    const loop = rafLoop(draw);
+    this._dispose = () => { loop.stop(); offResize(); };
+  },
+  unmount() { if (this._dispose) this._dispose(); }
+};
+
+__lx_exp["twin"] = twin;
+};
+__mods["js/store.js"] = function(__lx_req, __lx_exp){
+// 全局状态：localStorage 持久化 + 订阅广播
+// 让 8 大模块形成端到端数据流：星云注入 → 退休预填 → 星图涟漪 → 双生共振 → 断代史报告
+
+const KEY = 'xingyan_state_v1';
+
+const DEFAULT = {
+  profile: {
+    injected: false,
+    age: 30, industry: '互联网', dilemma: '成长停滞',
+    features: { hard: '', life: '', niche: '' },
+    fearSeed: ''        // 命运种子：一句话「我最怕的是…」
+  },
+  retirement: null,     // computeRetirement 结果
+  lastRipple: null,     // { source, name, impact, results:[{from,to,depth,impact,resistance}] }
+  decisions: [],        // 扇形决策快照：{source,name,impact,ruleId,at,year,rebound}
+  edgeResistance: {},   // 长按连线调阻尼后覆盖：{ 'me|spouse': 0.7 }
+  secrets: [],          // 秘密边：{from,to,label}（仅自己可见）
+  positions: {},        // 可编辑引力微粒当前值：{age,city,job,...}
+  twinPicks: [],        // 选中的共振对相似度列表：{name,sim}
+  markers: [],          // 事件钉：{year,type,label} type: decision|retire|policy
+  reportLayout: ['profile','ripple','friction','twin','retire','letter'], // 报告章节顺序
+  letter: '',           // 给十年后的信（末段）
+  frictionUnresolved: 0,// 未解摩擦累计（高阻尼边）
+  settings: { mute: false, probeYear: 2026, split: false, probeAggression: 0 }
+};
+
+let state = load();
+const subs = new Set();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return structuredClone(DEFAULT);
+    return Object.assign(structuredClone(DEFAULT), JSON.parse(raw));
+  } catch (e) { return structuredClone(DEFAULT); }
+}
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function getState() { return state; }
+function setState(patch) {
+  state = Object.assign({}, state, patch);
+  persist();
+  subs.forEach(fn => fn(state));
+}
+function update(path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  let obj = state;
+  for (const k of keys) obj = obj[k];
+  obj[last] = value;
+  persist();
+  subs.forEach(fn => fn(state));
+}
+function subscribe(fn) {
+  subs.add(fn);
+  return () => subs.delete(fn);
+}
+function reset() {
+  state = structuredClone(DEFAULT);
+  persist();
+  subs.forEach(fn => fn(state));
+}
+
+__lx_exp["getState"] = getState;
+__lx_exp["setState"] = setState;
+__lx_exp["update"] = update;
+__lx_exp["subscribe"] = subscribe;
+__lx_exp["reset"] = reset;
+};
+__mods["js/utils/canvas.js"] = function(__lx_req, __lx_exp){
+// 工具：canvas 适配 + 动画循环
+function fitCanvas(canvas, height) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width;
+  const H = height || rect.height || 300;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, W, H, dpr };
+}
+
+// 自适应：画布高度随父容器（flex 子项）伸缩，消除大屏写死高度导致的留白
+function fitCanvasFlex(canvas) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const wrap = canvas.parentElement;
+  const rect = wrap.getBoundingClientRect();
+  const W = rect.width;
+  const H = Math.max(240, wrap.clientHeight || rect.height || 320);
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, W, H, dpr };
+}
+
+// 返回 { stop } 的 rAF 循环
+function rafLoop(step) {
+  let id = 0;
+  let running = true;
+  function tick() {
+    if (!running) return;
+    step();
+    id = requestAnimationFrame(tick);
+  }
+  id = requestAnimationFrame(tick);
+  return {
+    stop() { running = false; cancelAnimationFrame(id); }
+  };
+}
+
+function onResize(cb) {
+  window.addEventListener('resize', cb);
+  return () => window.removeEventListener('resize', cb);
+}
+
+__lx_exp["fitCanvas"] = fitCanvas;
+__lx_exp["fitCanvasFlex"] = fitCanvasFlex;
+__lx_exp["rafLoop"] = rafLoop;
+__lx_exp["onResize"] = onResize;
+};
+__mods["js/utils/dom.js"] = function(__lx_req, __lx_exp){
+// 工具：轻量 DOM 辅助
+function el(tag, props = {}, children = []) {
+  const node = document.createElement(tag);
+  for (const k in props) {
+    if (k === 'class') node.className = props[k];
+    else if (k === 'html') node.innerHTML = props[k];
+    else if (k === 'text') node.textContent = props[k];
+    else if (k.startsWith('on') && typeof props[k] === 'function') {
+      node.addEventListener(k.slice(2).toLowerCase(), props[k]);
+    } else if (k === 'style' && typeof props[k] === 'object') {
+      Object.assign(node.style, props[k]);
+    } else if (props[k] != null) {
+      node.setAttribute(k, props[k]);
+    }
+  }
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c == null) return;
+    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return node;
+}
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+__lx_exp["el"] = el;
+__lx_exp["$"] = $;
+__lx_exp["$$"] = $$;
+};
+__mods["js/utils/math.js"] = function(__lx_req, __lx_exp){
+// 工具：数学辅助
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const dist = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
+const fmt1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
+
+__lx_exp["clamp"] = clamp;
+__lx_exp["lerp"] = lerp;
+__lx_exp["dist"] = dist;
+__lx_exp["fmt1"] = fmt1;
+};
+
+__lx_req("js/main.js");
+})();
+</script>
+</body>
+</html>

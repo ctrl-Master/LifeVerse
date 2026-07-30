@@ -1,0 +1,10 @@
+{
+  "name": "xingyan-lifeverse",
+  "version": "2.1.0",
+  "description": "星衍 LifeVerse · 人生轨迹推演空间（纯前端可运行 MVP，原生 Vanilla + ES Module）",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "private": true
+}

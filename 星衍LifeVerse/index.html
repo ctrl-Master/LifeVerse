@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>星衍 LifeVerse · 人生轨迹推演空间</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <canvas id="bgStarNet"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">星衍 <em>LifeVerse</em></span>
+      <span class="brand-tag">人生轨迹推演空间 · PRD v2.2 · 丰富化</span>
+      <span class="hud-badge" id="hudBadge">
+        <span class="hud-year" id="hudYear">探针 2026</span>
+        <span class="hud-ring" id="hudRing" title="人生完整度">0%</span>
+      </span>
+    </div>
+    <div class="topbar-right">
+      <button id="micBtn" class="icon-btn" title="语音指令（说：涟漪 / 宇宙 / 退休 / 重置 / 分屏）">🎙️</button>
+      <button id="soundToggle" class="icon-btn" title="音效设置">🔊</button>
+      <div id="audioPanel" class="audio-panel" style="display:none">
+        <div class="ap-title">音效通道</div>
+        <label><input type="checkbox" id="ch_mute"> 全部静音</label>
+        <label><input type="checkbox" id="ch_nebula" checked> 星云坍缩</label>
+        <label><input type="checkbox" id="ch_gravity" checked> 引力拉扯</label>
+        <label><input type="checkbox" id="ch_ripple" checked> 涟漪 / 撕裂</label>
+        <label><input type="checkbox" id="ch_resonance" checked> 跨时空共振</label>
+      </div>
+    </div>
+  </header>
+
+  <div id="narrativeBar" class="narrative-bar">
+    <span class="nar-dot"></span>
+    <span id="narrativeText">欢迎来到星衍 LifeVerse · 拖拽星体、滑动探针，用「手势」而非按钮推演你的人生。</span>
+  </div>
+
+  <div class="layout">
+    <nav id="nav" class="sidenav"></nav>
+    <main id="stage" class="stage"></main>
+  </div>
+
+  <div id="voiceTip" class="voice-tip" style="display:none"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

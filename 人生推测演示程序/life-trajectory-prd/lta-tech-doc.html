@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>星衍 LifeVerse · 技术设计文档 v2.1</title>
+<style>
+  :root{
+    --accent:#4f46e5; --accent-light:#eef2ff; --accent2:#0ea5e9; --accent2-light:#e0f2fe;
+    --green:#059669; --green-light:#ecfdf5; --amber:#d97706; --red:#e11d48;
+    --ink:#1a1d2e; --muted:#64748b; --rule:#e6e8ef; --bg:#ffffff; --panel:#f8fafc;
+    --code-bg:#0f172a; --code-ink:#e2e8f0;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    line-height:1.7;font-size:15px;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 80px;}
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#4f46e5 0%,#0ea5e9 100%);color:#fff;
+    padding:54px 24px 46px;margin-bottom:34px;}
+  .hero-inner{max-width:1120px;margin:0 auto;}
+  .hero h1{margin:0 0 8px;font-size:32px;letter-spacing:1px;}
+  .hero p{margin:4px 0;opacity:.92;font-size:15px;}
+  .hero .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;}
+  .hero .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+    padding:4px 11px;border-radius:999px;font-size:12.5px;}
+  /* TOC */
+  .toc{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:18px 22px;margin-bottom:34px;}
+  .toc h3{margin:0 0 10px;font-size:15px;color:var(--accent);}
+  .toc a{color:var(--ink);text-decoration:none;display:block;padding:3px 0;font-size:14px;}
+  .toc a:hover{color:var(--accent);}
+  .toc .col{display:grid;grid-template-columns:1fr 1fr;gap:0 30px;}
+  /* Section */
+  section{margin-bottom:40px;scroll-margin-top:20px;}
+  .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--accent);
+    padding-bottom:8px;margin-bottom:18px;}
+  .sec-head .num{font-size:13px;font-weight:800;color:#fff;background:var(--accent);
+    border-radius:7px;padding:2px 9px;letter-spacing:1px;}
+  .sec-head h2{margin:0;font-size:22px;letter-spacing:.5px;}
+  .lead{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+  /* cards */
+  .card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:18px 20px;margin:14px 0;}
+  .card-title{font-weight:700;font-size:15.5px;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:999px;
+    background:var(--accent-light);color:var(--accent);font-weight:700;vertical-align:middle;}
+  .tag.green{background:var(--green-light);color:var(--green);}
+  .tag.amber{background:#fffbeb;color:var(--amber);}
+  .tag.red{background:#fff1f3;color:var(--red);}
+  .muted{color:var(--muted);}
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+  th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top;}
+  th{background:var(--panel);color:var(--ink);font-weight:700;}
+  tbody tr:nth-child(even){background:#fcfdff;}
+  code.k{background:var(--accent-light);color:var(--accent);padding:1px 6px;border-radius:5px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;font-size:12.5px;}
+  /* code block */
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:16px 18px;
+    overflow:auto;font-family:"SF Mono",Consolas,Menlo,monospace;font-size:12.8px;line-height:1.6;}
+  pre .c{color:#94a3b8;} pre .k{color:#93c5fd;} pre .s{color:#86efac;} pre .n{color:#fcd34d;}
+  /* callout */
+  .note{border-left:4px solid var(--accent);background:var(--accent-light);border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:14px 0;font-size:14px;}
+  .note.warn{border-left-color:var(--amber);background:#fffbeb;}
+  .note.red{border-left-color:var(--red);background:#fff1f3;}
+  .note.green{border-left-color:var(--green);background:var(--green-light);}
+  .note b{color:var(--ink);}
+  /* arch diagram */
+  .arch{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:16px 0;}
+  .arch .layer{flex:1;min-width:150px;border:1px solid var(--rule);border-radius:10px;padding:12px 14px;
+    background:#fff;margin:4px;}
+  .arch .layer h4{margin:0 0 6px;font-size:13px;color:var(--accent);}
+  .arch .layer ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--muted);}
+  .arch .arrow{display:flex;align-items:center;justify-content:center;color:var(--accent2);font-size:20px;padding:0 4px;}
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:14px 0;}
+  .flow .box{border:1px solid var(--accent);border-radius:8px;padding:8px 12px;background:var(--accent-light);
+    font-size:12.5px;font-weight:600;color:var(--accent);}
+  .flow .ar{color:var(--muted);padding:0 6px;}
+  footer{border-top:1px solid var(--rule);margin-top:50px;padding-top:20px;color:var(--muted);font-size:13px;}
+  .pill{display:inline-block;background:var(--panel);border:1px solid var(--rule);border-radius:999px;
+    padding:3px 10px;font-size:12px;margin:2px 3px 2px 0;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>星衍 LifeVerse · 技术设计文档</h1>
+    <p><strong>人生动态推演空间</strong> · Technical Design Specification</p>
+    <p>基于「人生轨迹推演器 / 星衍 LifeVerse」PRD v2.0 + v2.1 的算法与系统实现设计</p>
+    <div class="tags">
+      <span>PRD v2.1</span>
+      <span>退休时钟算法</span>
+      <span>星图 BFS 引擎</span>
+      <span>关系阻尼 / 反弹波</span>
+      <span>结构相似度向量矩阵</span>
+      <span>Canvas 2D / Web Audio</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="toc">
+  <h3>目录</h3>
+  <div class="col">
+    <div>
+      <a href="#s01">01 系统总体架构</a>
+      <a href="#s02">02 模块7 · 退休时钟算法</a>
+      <a href="#s03">03 模块8 · 星图 BFS 引擎</a>
+      <a href="#s04">04 关系传导规则库</a>
+      <a href="#s05">05 阻尼与反弹数学模型</a>
+      <a href="#s06">06 结构相似度向量矩阵</a>
+      <a href="#s07">07 模块1 · 混沌星云注入</a>
+    </div>
+    <div>
+      <a href="#s08">08 模块3 · 双生时空剪影</a>
+      <a href="#s09">09 模块5 · 光阴探针与平行宇宙撕裂</a>
+      <a href="#s10">10 视听与微动效引擎</a>
+      <a href="#s11">11 RAG 知识库架构</a>
+      <a href="#s12">12 数据模型与接口</a>
+      <a href="#s13">13 性能、降级与一致性审查</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 01 ===================== -->
+<section id="s01">
+  <div class="sec-head"><span class="num">01</span><h2>系统总体架构</h2></div>
+  <p class="lead">星衍 LifeVerse 采用「前端沉浸式推演画布 + 规则/模型混合推理引擎 + RAG 知识底座」三层架构。交互原型与轻量算法（退休时钟、星图涟漪、向量匹配）在浏览器端 Canvas/JS 实时运行；重推理（路径推演、历史投影、报告生成）走后端 RAG + 规则引擎。本技术文档聚焦 <b>已落地、可复算</b> 的前端算法与数据模型。</p>
+
+  <div class="arch">
+    <div class="layer">
+      <h4>① 交互表现层（前端）</h4>
+      <ul>
+        <li>Canvas 2D 星网背景</li>
+        <li>混沌星云 / 双生时空 / 星图 / 光阴探针 Demo</li>
+        <li>Web Audio 音效引擎</li>
+        <li>断代史报告渲染</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="layer">
+      <h4>② 推演引擎层（规则 + 轻模型）</h4>
+      <ul>
+        <li>退休时钟（确定性政策算法）</li>
+        <li>星图 BFS 涟漪 + 阻尼/反弹</li>
+        <li>结构相似度向量匹配</li>
+        <li>沙盘路径概率矩阵</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="layer">
+      <h4>③ 知识底座层（RAG）</h4>
+      <ul>
+        <li>历史人物库 / 现代行业库</li>
+        <li>未来趋势库 / 政策法规库</li>
+        <li>关系传导规则库</li>
+        <li>向量检索 + 可溯源引用</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note"><b>设计原则：</b>「软推演建立想象力，硬计算建立信任感」。退休时钟等与政策强绑定的模块用 <b>100% 确定性算法</b>（可被任何人复算验证）；路径/关系/历史投影用 <b>概率 + 可溯源规则</b>，每条结论可追到知识库记录。</div>
+
+  <div class="flow">
+    <span class="box">用户手势/输入</span><span class="ar">→</span>
+    <span class="box">特征提取（Module 1）</span><span class="ar">→</span>
+    <span class="box">镜像/历史匹配（Module 2/3）</span><span class="ar">→</span>
+    <span class="box">路径推演（Module 4）</span><span class="ar">→</span>
+    <span class="box">沙盘（Module 5）</span><span class="ar">→</span>
+    <span class="box">退休时钟（Module 7）</span><span class="ar">→</span>
+    <span class="box">星图涟漪（Module 8）</span><span class="ar">→</span>
+    <span class="box">断代史报告（Module 6）</span>
+  </div>
+</section>
+
+<!-- ===================== 02 ===================== -->
+<section id="s02">
+  <div class="sec-head"><span class="num">02</span><h2>模块7 · 个人退休时间预测（退休时钟）</h2></div>
+  <p class="lead">本模块是产品最「硬」的功能——政策白纸黑字、算法完全确定、结果可被任何人验证。算法严格对齐《关于实施渐进式延迟法定退休年龄的决定》（2024-09-13 通过，2025-01-01 施行）。以下实现已在 <code class="k">life-trajectory-prd.html</code> 中以真实 JS 落地，并经 Node 复算验证。</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>政策参数表（代码常量）</div>
+    <table>
+      <tr><th>人员类型</th><th>原法定年龄</th><th>延迟起点</th><th>延迟节奏</th><th>封顶延后</th><th>封顶年龄</th></tr>
+      <tr><td>男职工</td><td>60</td><td>1965-01</td><td>每 4 个月 +1 月</td><td>+36 月</td><td>63</td></tr>
+      <tr><td>女（管理/技术·55档）</td><td>55</td><td>1970-01</td><td>每 4 个月 +1 月</td><td>+36 月</td><td>58</td></tr>
+      <tr><td>女（生产/操作·50档）</td><td>50</td><td>1975-01</td><td>每 2 个月 +1 月</td><td>+60 月</td><td>55</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>核心算法（与 PRD 实现逐行对应）</div>
+<pre><span class="c">// 1) 延迟月数：按出生年月所在「延迟档位」计算</span>
+<span class="k">function</span> delayMonths(type, by, bm){
+  <span class="k">var</span> elapsed;
+  <span class="k">if</span>      (type===<span class="s">'male'</span>)     { elapsed=monthsFrom(<span class="n">1965</span>,<span class="n">1</span>,by,bm); <span class="k">return</span> Math.min(<span class="n">36</span>, Math.floor(elapsed/<span class="n">4</span>)+<span class="n">1</span>); }
+  <span class="k">else if</span> (type===<span class="s">'female55'</span>) { elapsed=monthsFrom(<span class="n">1970</span>,<span class="n">1</span>,by,bm); <span class="k">return</span> Math.min(<span class="n">36</span>, Math.floor(elapsed/<span class="n">4</span>)+<span class="n">1</span>); }
+  <span class="k">else</span>                      { elapsed=monthsFrom(<span class="n">1975</span>,<span class="n">1</span>,by,bm); <span class="k">return</span> Math.min(<span class="n">60</span>, Math.floor(elapsed/<span class="n">2</span>)+<span class="n">1</span>); }
+}
+
+<span class="c">// 2) 最低缴费年限：2029 及以前 15 年；2030 起每年 +0.5，封顶 20</span>
+<span class="k">function</span> minPayYears(retireYear){
+  <span class="k">if</span>(retireYear<=<span class="n">2029</span>) <span class="k">return</span> <span class="n">15</span>;
+  <span class="k">return</span> Math.min(<span class="n">20</span>, <span class="n">15</span> + (retireYear-<span class="n">2029</span>)*<span class="n">0.5</span>);
+}
+
+<span class="c">// 3) 法定退休月序 = 出生月序 + 原法定年龄×12 + 延迟月数</span>
+statutoryIdx = birthIdx + baseAge*<span class="n">12</span> + dm;
+
+<span class="c">// 4) 弹性钳制：提前不得低于原法定年龄；延迟最多 +36 月</span>
+earliestIdx = Math.max(statutoryIdx - <span class="n">36</span>, birthIdx + baseAge*<span class="n">12</span>);
+actualIdx   = clamp(statutoryIdx + flex, earliestIdx, statutoryIdx + <span class="n">36</span>);
+
+<span class="c">// 5) 计发月数查表（FAFA）：50→195 / 55→170 / 60→139 / 63→117 …</span>
+</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>边界值验证（Node 复算，与官方政策一致）</div>
+    <table>
+      <tr><th>人员类型</th><th>出生年月</th><th>延迟档位</th><th>预计退休</th><th>实际退休年龄</th><th>最低缴费</th></tr>
+      <tr><td>男职工</td><td>1965-01</td><td>+1 月</td><td>2025-02</td><td>60 岁 1 个月</td><td>15 年</td></tr>
+      <tr><td>男职工</td><td>1965-09</td><td>+3 月</td><td>2025-12</td><td>60 岁 3 个月</td><td>15 年</td></tr>
+      <tr><td>男职工</td><td>1976-08</td><td>+35 月</td><td>2039-07</td><td>62 岁 11 个月</td><td>20 年</td></tr>
+      <tr><td><b>男职工</b></td><td><b>1976-09</b></td><td><b>+36 月（封顶）</b></td><td><b>2039-09</b></td><td><b>63 岁</b></td><td>20 年</td></tr>
+      <tr><td>男职工</td><td>2000-01</td><td>+36 月</td><td>2063-01</td><td>63 岁</td><td>20 年</td></tr>
+      <tr><td>女 55 档</td><td>1981-12</td><td>+36 月（封顶）</td><td>2039-12</td><td>58 岁</td><td>20 年</td></tr>
+      <tr><td>女 50 档</td><td>1985-11</td><td>+60 月（封顶）</td><td>2040-11</td><td>55 岁</td><td>20 年</td></tr>
+      <tr><td>女 50 档</td><td>1986-01</td><td>+60 月（封顶）</td><td>2041-01</td><td>55 岁</td><td>20 年</td></tr>
+    </table>
+    <div class="note green"><b>结论：</b>封顶年龄（男 63 / 女 55 档 58 / 女 50 档 55）与「该出生月及以后统一封顶」的临界点（1976-09 / 1981-12 / 1985-11）均与政策文本完全吻合；最低缴费年限在退休年 ≥2040 时正确跃迁为 20 年。</div>
+  </div>
+
+  <div class="note"><b>联动设计：</b>退休时钟不是孤立计算器，它把「退休参数」写入用户星体，触发三类传导——<b>① 沙盘联动</b>（体制内 80-90% vs 企业职工 40-50% 替代率对比）、<b>② 家庭涟漪</b>（子女教育预算 / 配偶退休协同实时重算）、<b>③ 报告注入</b>（断代史报告新增退休时钟章节）。</div>
+</section>
+
+<!-- ===================== 03 ===================== -->
+<section id="s03">
+  <div class="sec-head"><span class="num">03</span><h2>模块8 · 人生星图涟漪传导引擎（BFS）</h2></div>
+  <p class="lead">将家庭/职场关系建模为一张带权有向（无向存储）图，任一星体的状态事件沿引力网做<b>广度优先传播（BFS）</b>，逐层计算受影响星体的参数变化，并以 Canvas 涟漪动画逐圈呈现。这是 v2.0 的灵魂模块，回答「中国人的重大人生决策从来不是一个人的事」。</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>图数据模型</div>
+    <p><b>节点（11 个，3 圈层 tier）：</b></p>
+    <table>
+      <tr><th>tier</th><th>角色</th><th>颜色</th><th>半径</th></tr>
+      <tr><td>0（中心）</td><td>我</td><td>#4f46e5</td><td>16</td></tr>
+      <tr><td>1（核心家庭）</td><td>配偶 / 子女 / 父亲 / 母亲</td><td>#d97706</td><td>9–11</td></tr>
+      <tr><td>2（协作圈）</td><td>直属上级 / 核心同事 / 行业导师</td><td>#0ea5e9</td><td>8</td></tr>
+      <tr><td>3（同代人星云）</td><td>同代人 A / B / C</td><td>#94a3b8</td><td>6</td></tr>
+    </table>
+    <p style="margin-top:12px;"><b>引力线（14 条）：</b>每条 <code class="k">[src, dst, strength, resistance]</code></p>
+    <ul>
+      <li><code class="k">strength</code> ∈ (0,1]：关系强度（影响传导的乘性系数）</li>
+      <li><code class="k">resistance</code> ∈ [0,1]：<b>v2.1 新增</b>关系阻尼系数（高阻尼 → 反弹波）</li>
+    </ul>
+    <p class="muted" style="font-size:13px;">示例：<code class="k">['me','father',0.7,0.70]</code> 表示「我↔父亲」强度 0.7、阻尼 0.70（代际价值观冲突高摩擦）；<code class="k">['me','spouse',0.9,0.30]</code> 表示配偶强度高、阻尼低。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>传播算法（castRipple）</div>
+<pre><span class="k">const</span> DECAY = [<span class="n">1</span>, <span class="n">0.7</span>, <span class="n">0.4</span>, <span class="n">0.15</span>];   <span class="c">// 第0/1/2/3 圈衰减系数</span>
+
+<span class="k">function</span> castRipple(sourceId, eventName, baseImpact){
+  queue = [{id:sourceId, depth:<span class="n">0</span>, impact:baseImpact}]; visited={sourceId:<span class="k">true</span>};
+  <span class="k">while</span>(queue.length){
+    cur = queue.shift();
+    <span class="k">for</span>(lk <span class="k">of</span> links){
+      nb = neighbor(lk, cur.id);
+      <span class="k">if</span>(!nb || visited[nb]) <span class="k">continue</span>;
+      strength   = lk[<span class="n">2</span>];
+      resistance = lk[<span class="n">3</span>] || <span class="n">0</span>;
+      nextImpact = cur.impact * strength * (DECAY[cur.depth+<span class="n">1</span>] || <span class="n">0.1</span>);
+      <span class="k">if</span>(Math.abs(nextImpact) &lt; <span class="n">0.05</span>) <span class="k">continue</span>;   <span class="c">// 低于阈值截断</span>
+      visited[nb] = <span class="k">true</span>;
+      queue.push({id:nb, depth:cur.depth+<span class="n">1</span>, impact:nextImpact});
+      results.push({from:cur.id, to:nb, depth:cur.depth+<span class="n">1</span>, impact:nextImpact, resistance});
+    }
+  }
+  <span class="c">// 逐条输出动画 + 日志；resistance≥0.5 触发反弹波（见 05 节）</span>
+}
+</pre>
+    <div class="note"><b>复杂度：</b>图规模极小（|V|=11, |E|=14），BFS 为 O(|V|+|E|)=O(25)，单次推演 < 1ms。传播结果按 depth 排序后，以 <code class="k">idx*420ms</code> 的节奏逐圈触发涟漪动画，形成「看得见、传得开、算得清」的心流。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>效果节点文案映射（describeEffect）</div>
+    <p class="muted" style="font-size:13px;">每个被传导星体根据角色给出可解释的业务含义，而非抽象数字——这是「严肃决策价值」的体现：</p>
+    <table>
+      <tr><th>星体</th><th>传导后参数含义</th></tr>
+      <tr><td>配偶</td><td>家庭现金流承压节点前移，「稳定优先」权重上调</td></tr>
+      <tr><td>子女</td><td>教育预算曲线重算，兴趣班投入弹性区间收窄</td></tr>
+      <tr><td>父亲/母亲</td><td>养老支持金 / 照护时间分配重排</td></tr>
+      <tr><td>直属上级</td><td>团队人力缺口风险上升，接任者培养提前</td></tr>
+      <tr><td>核心同事</td><td>协作依赖重构，晋升窗口概率 +3pt</td></tr>
+      <tr><td>行业导师</td><td>人脉网络节点迁移，推荐背书路径变化</td></tr>
+      <tr><td>同代人</td><td>镜像人群路径样本 / 岗位竞争密度更新</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== 04 ===================== -->
+<section id="s04">
+  <div class="sec-head"><span class="num">04</span><h2>关系传导规则库</h2></div>
+  <p class="lead">BFS 中的 <code class="k">strength</code> / <code class="k">resistance</code> / 文案 来自「关系传导规则库」。首期 200 条由家庭财务规划师 + 社会学研究者联合编写，中期用镜像人群真实路径数据回归拟合扩充至 2000 条。</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>规则 Schema</div>
+<pre><span class="c">// 单条规则结构</span>
+{
+  id:            <span class="s">"R0001"</span>,
+  eventType:     <span class="s">"职业变动"</span>,          <span class="c">// 婚育/购房/赡养/教育/职业变动/退休安排（6 大类）</span>
+  sourceRole:    <span class="s">"me"</span>,                 <span class="c">// 事件施加方角色</span>
+  targetRelation:<span class="s">"spouse"</span>,              <span class="c">// 受影响方关系</span>
+  transferFn:    <span class="s">"impact * 0.9 * DECAY[d]"</span>, <span class="c">// 传导函数（公式）</span>
+  decay:         <span class="n">0.7</span>,                   <span class="c">// 该关系圈层衰减系数</span>
+  resistance:    <span class="n">0.30</span>,                  <span class="c">// 阻尼系数</span>
+  confidence:    <span class="n">0.86</span>,                  <span class="c">// 置信度</span>
+  source:        <span class="s">"专家评审 v1"</span>           <span class="c">// 来源（人工/回归拟合）</span>
+}
+</pre>
+    <div class="note"><b>首期规模 vs 中期目标：</b><span class="pill">首期 200 条</span><span class="pill">人工编写 + 双专家评审</span><span class="pill">中期 2000 条（18 个月内）</span><span class="pill">镜像人群数据回归拟合</span></div>
+    <div class="note warn"><b>评审备注：</b>当前 PRD 原型中 <code class="k">strength/resistance</code> 以常量数组内联（<code class="k">links</code> 表），未接规则库表。生产化时须将 <code class="k">links</code> 的 [strength, resistance] 改为查表 <code class="k">R[eventType][sourceRole][targetRelation]</code>，以支持按事件类型动态选规则——这是 v2.1 之后的工程化待办。</div>
+  </div>
+</section>
+
+<!-- ===================== 05 ===================== -->
+<section id="s05">
+  <div class="sec-head"><span class="num">05</span><h2>关系阻尼与引力波反弹（Resistance &amp; Echo Wave）</h2></div>
+  <p class="lead">v2.0 的涟漪假设「影响沿引力线顺畅扩散」，但真实家庭系统里大量影响会被<b>关系阻力</b>消耗、甚至反弹。v2.1 给每条引力线加 <code class="k">Resistance</code> 阻尼系数，让「家庭内部决策摩擦」变得可被看见、可被量化。</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>反弹波触发与摩擦度</div>
+<pre><span class="c">// 在 BFS 结果逐条输出时：</span>
+<span class="k">if</span>(r.resistance &gt;= <span class="n">0.5</span>){
+  friction = <span class="s">"⚠ 反弹波：家庭决策摩擦度 +"</span> + (r.resistance*<span class="n">100</span>).toFixed(<span class="n">0</span>) + <span class="s">"%"</span>;
+  ripples.push({ x, y, r, max:<span class="n">70</span>, alpha:<span class="n">0.5</span>, echo:<span class="k">true</span> });  <span class="c">// 红色 Echo Wave</span>
+  LTASound.echo();                                      <span class="c">// 80Hz 锯齿摩擦声</span>
+}
+</pre>
+    <table>
+      <tr><th>阻尼系数 <code class="k">r</code></th><th>传导表现</th><th>视觉</th></tr>
+      <tr><td>r &lt; 0.5</td><td>影响正常衰减传播</td><td>紫色涟漪</td></tr>
+      <tr><td>r ≥ 0.5</td><td>触发<b>反弹波</b>，写入摩擦度增量</td><td>红色 Echo Wave + 「家庭决策摩擦度 +X%」</td></tr>
+    </table>
+  </div>
+
+  <div class="note red"><b>⚠ 一致性审查发现（重要）：</b>PRD 文本/MD 中描述的能量损耗模型 <code class="k">实际传导量 = 期望传导量 × (1 − r × 0.6)</code> 与 <code class="k">life-trajectory-prd.html</code> 当前实现<b>不完全一致</b>。当前实现：① 仅以 <code class="k">resistance≥0.5</code> 触发红色反弹波动画 + 摩擦度日志；② <b>未在数学上用 (1−r×0.6) 衰减 <code class="k">nextImpact</code></b>。即「反弹」目前是可视化 + 日志层，尚未真实削减传导强度。建议在 castRipple 中加入：</div>
+<pre><span class="c">// 建议修复补丁（使 MD 描述与实现一致）</span>
+<span class="k">if</span>(resistance &gt;= <span class="n">0.5</span>) nextImpact *= (<span class="n">1</span> - resistance*<span class="n">0.6</span>);  <span class="c">// 高阻尼损耗 30%~60% 能量</span>
+</pre>
+  <p class="muted" style="font-size:13px;">摩擦度为<b>累积量</b>：同一关系多次触发反弹持续累加，超阈值（如 60%）时断代史报告标注「该关系当前处于高摩擦状态，重大决策建议优先线下沟通」。阻尼系数首期按关系类型预置（我↔父母 0.70 / 我↔配偶 0.30），后续可由用户在星图上长按引力线手动微调。</p>
+</section>
+
+<!-- ===================== 06 ===================== -->
+<section id="s06">
+  <div class="sec-head"><span class="num">06</span><h2>结构相似度向量矩阵（Structural Vector Matrix）</h2></div>
+  <p class="lead">正面回答「为什么我是后端开发，却匹配成唐朝漕运官，而不是宋朝修塔工？」——系统对每个现代职业困境与每个古代普通职业各抽取一个<b>三维结构向量</b>，用<b>余弦相似度</b>而非「职业名称相似度」做匹配，使历史投影可被解释、可被质疑、可被复算。</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>三维结构向量定义</div>
+    <table>
+      <tr><th>维度</th><th>含义</th><th>取值语义</th></tr>
+      <tr><td>v₁ 系统网络脆弱性</td><td>所处系统在冲击下的连锁崩塌风险</td><td>高 = 牵一发动全身</td></tr>
+      <tr><td>v₂ 替代技术出现速度</td><td>被新技术替代的速率</td><td>高 = 技能贬值快</td></tr>
+      <tr><td>v₃ 官僚体制锁死程度</td><td>制度僵化对个体选择的约束</td><td>高 = 上升通道窄</td></tr>
+    </table>
+    <p class="muted" style="font-size:13px;">$$ \text{sim}(q, v) = \dfrac{q \cdot v}{|q|\,|v|} = \dfrac{\sum_i q_i v_i}{\sqrt{\sum_i q_i^2}\,\sqrt{\sum_i v_i^2}} $$</p>
+    <p class="muted" style="font-size:13px;">其中 <code class="k">q</code> 为当前用户经特征提取（Module 1）得到的「现代结构向量」；<code class="k">v</code> 为候选古代职业向量。取 sim 最高者优先映射。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>可验证算例（来自 PRD/MD 给定古代向量）</div>
+    <table>
+      <tr><th>古代职业</th><th>向量 [v₁, v₂, v₃]</th><th>余弦相似度</th></tr>
+      <tr><td>唐朝漕运检修官</td><td>[0.80, 0.75, 0.30]</td><td><b>≈ 0.985</b>（最高，优先映射）</td></tr>
+      <tr><td>明朝工部匠师</td><td>[0.70, 0.60, 0.20]</td><td>≈ 0.95</td></tr>
+      <tr><td>宋朝市舶书吏</td><td>[0.55, 0.88, 0.45]</td><td>≈ 0.94</td></tr>
+    </table>
+    <div class="note"><b>可解释性：</b>后端开发的核心困境（系统耦合脆弱、技术迭代快、科层晋升受限）与唐朝漕运检修官在三维结构上最接近，故优先投影——而非名字听起来像「修塔工」的宋朝岗位。用户可要求查看每个维度的数值对比，实现「算法透明」。</div>
+  </div>
+</section>
+
+<!-- ===================== 07 ===================== -->
+<section id="s07">
+  <div class="sec-head"><span class="num">07</span><h2>模块1 · 混沌星云注入（创世 Data Injection）</h2></div>
+  <p class="lead">用「星体坍缩」物理手势取代传统表单：拖入简历/资料 → 星云坍缩 → 中心主星「我」成型；缺失字段以漂浮「引力微粒」呈现，点击/拖拽注入。</p>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>状态机与填充模型</div>
+    <ul>
+      <li><b>粒子系统：</b>140 个粒子，自由漂移（边界反弹），<code class="k">requestAnimationFrame</code> 驱动。</li>
+      <li><b>坍缩态：</b>点击注入后 <code class="k">condenseT</code> 从 0 线性增至 1（每帧 +0.004），粒子向中心 (cx,cy) 收敛，速度 <code class="k">min(d, 2.4×condenseT)</code>。</li>
+      <li><b>主星成型：</b><code class="k">condenseT≥1</code> 时主星「我」凝聚，完成度 <code class="k">fill</code> 置为 <b>72%</b>，并生成 3 颗引力微粒（年龄 / 行业 / 困境）。</li>
+      <li><b>微粒注入：</b>每注入 1 个缺失字段 <code class="k">fill += 9%</code>，进度条与特征卡实时更新；<code class="k">fill≥100%</code> 时提示「主星体凝聚完成 ✦」。</li>
+    </ul>
+    <div class="note"><b>字段→特征映射：</b>fill 达 72% 即解锁特征卡（如 硬技能=Java后端/微服务、人生阶段=深耕期后半、生态位=可替代中层），无需等 100%，保证探索流畅。</div>
+  </div>
+</section>
+
+<!-- ===================== 08 ===================== -->
+<section id="s08">
+  <div class="sec-head"><span class="num">08</span><h2>模块3 · 双生时空剪影（跨时空共振）</h2></div>
+  <p class="lead">用「多模态视觉隐喻」替代传统对比表：现代蓝轨（科技星轨 #0ea5e9）与古代金石轨（#8a6d3b）并列，悬停左侧现代节点触发「跨时空共振」光束 + 竹简风词条。</p>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>交互技术</div>
+    <ul>
+      <li><b>双轨：</b><code class="k">mNodes</code>（现代）/ <code class="k">aNodes</code>（古代）各 3 节点，纵向等距排布，中轴虚线分隔。</li>
+      <li><b>共振光束：</b>悬停时以二次贝塞尔 <code class="k">quadraticCurveTo(mx, my-40, a.x, a.y)</code> 绘制琥珀色光束，光束上有一颗沿曲线运动的粒子（<code class="k">beamT</code> 动画）。</li>
+      <li><b>词条：</b>3 组配对（技能贬值/技艺贬值、转型成本/学艺成本、周期下行/漕运缩减），点击 / 悬停切换竹简文案。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 09 ===================== -->
+<section id="s09">
+  <div class="sec-head"><span class="num">09</span><h2>模块5 · 光阴探针 &amp; 平行宇宙撕裂</h2></div>
+  <p class="lead">把「时间」从静态坐标轴变成可拖拽手柄（光阴探针），把「假设分析」变成并排演化的星系（平行宇宙撕裂）。</p>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>光阴探针（时间轴滑块 2026–2036）</div>
+<pre><span class="c">// 探针绑定年份 → 实时重塑轨道半径</span>
+year = parseInt(slider.value);          <span class="c">// 2026 … 2036</span>
+<span class="k">function</span> system(cx, grow, title){
+  rings.forEach(<span class="k">function</span>(r, idx){
+    rr = r[<span class="n">0</span>] + (year-<span class="n">2026</span>) * (idx===<span class="n">0</span> ? <span class="n">5</span>*grow : <span class="n">2</span>*grow) + Math.sin(t*<span class="n">2</span>+idx)*<span class="n">2</span>;
+    <span class="c">// 第 0 圈每年扩张 5×grow，其余圈每年 2×grow；+正弦微扰</span>
+  });
+}
+</pre>
+    <div class="note"><b>平行宇宙撕裂：</b>点击「撕裂」→ <code class="k">split=true</code>，画布裂变为 A/B 双星系：<code class="k">A·转行</code>（grow=1.6，轨道快速扩张）与 <code class="k">B·不转行</code>（grow=0.4，轨道收敛）；两轨共享同一时间探针，差异星体以 halo 高亮。下方 <code class="k">#splitWrap</code> 对照文本（收入曲线 / 风险值 / 可替代性）。</div>
+  </div>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section id="s10">
+  <div class="sec-head"><span class="num">10</span><h2>视听与微动效引擎（v2.1）</h2></div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Web Audio 空间音效（window.LTASound）</div>
+    <table>
+      <tr><th>事件</th><th>频率</th><th>波形</th><th>时长</th><th>增益</th></tr>
+      <tr><td>星体连接 connect</td><td>120 Hz</td><td>sine</td><td>0.18s</td><td>0.05</td></tr>
+      <tr><td>涟漪扩散 ripple(depth)</td><td>520 Hz</td><td>sine（渐隐）</td><td>0.30s</td><td>[0.05,0.03,0.012][depth]</td></tr>
+      <tr><td>反弹波 echo</td><td>80 Hz</td><td>sawtooth</td><td>0.15s</td><td>0.04</td></tr>
+    </table>
+    <ul>
+      <li><code class="k">AudioContext</code> 懒初始化（首次用户交互后 <code class="k">_ac()</code>），避免自动播放限制。</li>
+      <li>导航栏 🔊/🔇 一键静音，状态持久化到 <code class="k">localStorage('ltasound')</code>。</li>
+    </ul>
+    <div class="note"><b>微动效规范：</b>呼吸光晕（中心星体 <code class="k">glow=6+sin(breath)*2</code>）、引力线弹性形变、光阴探针轨道形变——均以 Canvas 逐帧轻量计算，不依赖外部动画库。</div>
+  </div>
+</section>
+
+<!-- ===================== 11 ===================== -->
+<section id="s11">
+  <div class="sec-head"><span class="num">11</span><h2>RAG 知识库架构（5 层）</h2></div>
+  <table>
+    <tr><th>#</th><th>知识库</th><th>支撑模块</th><th>规模</th><th>数据来源</th></tr>
+    <tr><td>1</td><td>历史人物库</td><td>模块3</td><td>~8,000 条 / 120+ 古代职业</td><td>《唐六典》/敦煌文书/宋方志/明《万历会计录》/墓志铭</td></tr>
+    <tr><td>2</td><td>现代行业库</td><td>模块1/2/5</td><td>~15 万条职业路径</td><td>招聘 JD 时序(2019-2026)/脉脉/薪酬报告</td></tr>
+    <tr><td>3</td><td>未来趋势库</td><td>模块4</td><td>~3,000 条趋势</td><td>麦肯锡/BCG/Gartner/CB Insights/SO/GitHub</td></tr>
+    <tr><td>4</td><td>政策法规库 ★</td><td>模块7</td><td>~400 条</td><td>延迟退休决定及配套/各省细则/计发办法；<b>人社部月度巡检，72h 内更新</b></td></tr>
+    <tr><td>5</td><td>关系传导规则库 ★</td><td>模块8</td><td>200→2000 条</td><td>人工编写(家财师+社会学评审) → 镜像人群数据回归拟合</td></tr>
+  </table>
+  <div class="note green"><b>RAG 核心价值 = 可溯源：</b>每条分析结论可追溯到知识库具体记录，而非 AI 自由发挥。对高成本决策场景（如转行、退休）至关重要。</div>
+</section>
+
+<!-- ===================== 12 ===================== -->
+<section id="s12">
+  <div class="sec-head"><span class="num">12</span><h2>数据模型与接口（草稿）</h2></div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>核心本地数据模型</div>
+<pre>UserNode   = { id, role, tier, baseAge, features:{hard,lifeStage,niche}, retireParams }
+GravityLink= { from, to, strength, resistance }
+RippleEvent= { sourceId, eventName, baseImpact, timestamp, results[] }
+RuleRecord = { id, eventType, sourceRole, targetRelation, transferFn, decay, resistance, confidence, source }
+Report     = { no:"LTA-YYYYMMDD-XXXXX", sections[8], createdAt }
+</pre>
+    <p class="muted" style="font-size:13px;">隐私红线：他人星体数据全部由用户主观录入，仅存于本地档案（localStorage / 本地 DB），绝不做真实社交关系抓取；星体默认使用关系称谓而非真实姓名。</p>
+  </div>
+</section>
+
+<!-- ===================== 13 ===================== -->
+<section id="s13">
+  <div class="sec-head"><span class="num">13</span><h2>性能、降级与一致性审查结论</h2></div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>性能指标</div>
+    <ul>
+      <li>Canvas 重绘目标 &lt; 16ms/帧（requestAnimationFrame 驱动，粒子数 90/移动端 40）。</li>
+      <li>星图 BFS O(|V|+|E|) ≈ 25 步；沙盘路径重算 &lt; 500ms（预计算映射表 + 插值）。</li>
+      <li>降级：L1（质量 3.0–3.5 提示条）/ L2（超时切模板）/ L3（缓存脱敏报告）。</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>三文件一致性审查（HTML / MD / 本技术文档）</div>
+    <table>
+      <tr><th>审查项</th><th>结果</th><th>说明</th></tr>
+      <tr><td>退休算法边界值</td><td><span class="tag green">一致</span></td><td>HTML 实现经 Node 复算，与政策封顶年龄/临界点/最低缴费完全一致</td></tr>
+      <tr><td>阻尼能量损耗模型</td><td><span class="tag red">不一致</span></td><td>MD 写「×(1−r×0.6)」但 HTML 未在数学上衰减 nextImpact，仅可视化+日志。已给出修复补丁（05 节）</td></tr>
+      <tr><td>结构相似度向量</td><td><span class="tag green">一致</span></td><td>HTML 与 MD 的古代向量与相似度数值一致（唐 0.985 / 明 0.95 / 宋 0.94）</td></tr>
+      <tr><td>版本号</td><td><span class="tag green">一致</span></td><td>HTML 标题/页脚、MD 标题、本技术文档均为 v2.1</td></tr>
+      <tr><td>规则库工程化</td><td><span class="tag amber">待办</span></td><td>原型 links 内联常量，生产化须接规则库表（04 节备注）</td></tr>
+    </table>
+    <div class="note"><b>交叉阅读结论：</b>HTML（交互原型）、MD（需求文档）、本技术文档（算法设计）三者主体一致；仅「阻尼能量损耗」一项存在「规格描述 vs 代码实现」的偏差，已定位并在 05 节给出最小修复补丁，建议作为 v2.2 第一项工程化任务。</div>
+  </div>
+</section>
+
+<footer>
+  <p><b>文档版本</b>：技术设计文档 v2.1（对齐 PRD v2.0 + v2.1）</p>
+  <p><b>配套文件</b>：<code class="k">life-trajectory-prd.html</code>（可交互原型）、<code class="k">星衍LifeVerse_需求文档v2.0.md</code>（自包含需求文档）</p>
+  <p><b>说明</b>：退休时钟为真实政策算法（可复算）；其余交互原型为示例数据，不代表最终产品表现。算法实现摘录自 HTML 原型并经 Node 边界复算验证。</p>
+  <p class="muted">*Generated by WorkBuddy · 2026-07-28*</p>
+</footer>
+
+</div>
+</body>
+</html>

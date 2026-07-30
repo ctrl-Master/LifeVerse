@@ -1,0 +1,15 @@
+# WorkBuddy project memory (private, not part of the product)
+.workbuddy/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
