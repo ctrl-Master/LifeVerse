@@ -2,20 +2,6 @@
 
 > 纯前端可运行 MVP（原生 Vanilla + ES Module，零依赖）。从 PRD v2.2（丰富化）抽取核心引擎，构建为可交互、可持久化、6 大模块端到端联动的真实工程。
 
-## 界面预览
-
-| 混沌星云注入 | 星图宇宙·关系引力场 |
-|:---:|:---:|
-| ![01-nebula](docs/screenshots/01-nebula-injected.png) | ![02-starmap](docs/screenshots/02-starmap.png) |
-
-| 双生时空剪影 | 退休时钟 |
-|:---:|:---:|
-| ![03-twin](docs/screenshots/03-twin.png) | ![04-retirement](docs/screenshots/04-retirement.png) |
-
-| 光阴探针 & 平行宇宙撕裂 | 个人断代史报告 |
-|:---:|:---:|
-| ![05-probe](docs/screenshots/05-probe.png) | ![06-report](docs/screenshots/06-report.png) |
-
 ## 快速开始
 
 ```bash
