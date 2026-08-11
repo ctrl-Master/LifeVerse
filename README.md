@@ -2,6 +2,20 @@
 
 > 纯前端可运行 MVP（原生 Vanilla + ES Module，零依赖）。从 PRD v2.2（丰富化）抽取核心引擎，构建为可交互、可持久化、6 大模块端到端联动的真实工程。
 
+## 界面预览
+
+| 混沌星云注入 | 星图宇宙·关系引力场 |
+|:---:|:---:|
+| ![01-nebula](docs/screenshots/01-nebula-injected.png) | ![02-starmap](docs/screenshots/02-starmap.png) |
+
+| 双生时空剪影 | 退休时钟 |
+|:---:|:---:|
+| ![03-twin](docs/screenshots/03-twin.png) | ![04-retirement](docs/screenshots/04-retirement.png) |
+
+| 光阴探针 & 平行宇宙撕裂 | 个人断代史报告 |
+|:---:|:---:|
+| ![05-probe](docs/screenshots/05-probe.png) | ![06-report](docs/screenshots/06-report.png) |
+
 ## 快速开始
 
 ```bash
@@ -15,7 +29,7 @@ npm start
 
 ### 离线单文件版（无需服务器）
 
-`星衍LifeVerse-standalone.html` 是一个**自包含单文件**（16 个模块已打包为单 IIFE + 内联 CSS），**可直接双击用浏览器打开离线运行**，适合分享与演示。改完源码后执行 `node build_standalone.cjs` 可重新生成它。
+`星衍LifeVerse-standalone.html` 是一个**自包含单文件**（16 个模块已打包为单 IIFE + 内联 CSS），**可直接双击用浏览器打开离线运行**，适合分享与演示。改完源码后执行 `npm run build:standalone` 可重新生成它。
 
 ## 模块地图（对应 PRD v2.1）
 
@@ -27,6 +41,38 @@ npm start
 | 04 退休时钟 | `js/modules/retirement.js` | 渐进式延迟退休真实算法 |
 | 05 光阴探针 & 平行宇宙撕裂 | `js/modules/probe.js` | 年份拖动轨道扩张 + A/B 双轨对比 |
 | 06 个人断代史报告 | `js/modules/report.js` | 聚合前序所有数据，一页可打印报告 |
+
+## 项目架构
+
+```
+星衍LifeVerse/
+├── js/
+│   ├── core/               # Phase 2 拆分：6 个核心子系统
+│   │   ├── router.js        # 模块注册表 + 路由切换
+│   │   ├── hud.js           # HUD 徽章 + 人生完整度环
+│   │   ├── narrator.js      # 叙事条 + 时代广播
+│   │   ├── bgStarNet.js     # 背景星网粒子动画
+│   │   ├── interactions.js  # 音效面板 + 快捷键 + 语音
+│   │   └── errorBoundary.js # 全局错误捕获
+│   ├── engines/             # 核心引擎（5 个，均有单元测试）
+│   │   ├── retirement.js    # 退休算法
+│   │   ├── starmap.js       # BFS 涟漪传导
+│   │   ├── rulebase.js      # 传导规则库
+│   │   ├── vectorMatrix.js  # 余弦相似度
+│   │   ├── audio.js         # Web Audio 音效
+│   │   └── index.js         # Barrel export
+│   ├── modules/             # 6 个 UI 模块
+│   ├── utils/               # 工具函数（math/dom/canvas）
+│   ├── store.js             # 状态管理 + schema 校验
+│   └── main.js              # 薄入口（41 行）
+├── tests/unit/              # Vitest 单元测试（6 个文件）
+├── scripts/build-standalone.mjs  # 零依赖打包脚本
+├── docs/                    # PRD 文档 + 截图
+├── vite.config.js           # Vite 构建
+├── vitest.config.js         # 测试配置
+├── eslint.config.js         # ESLint Flat Config
+└── package.json
+```
 
 ## 核心引擎（`js/engines/`）
 
@@ -40,27 +86,23 @@ npm start
 
 `星云注入 → 退休预填 → 星图涟漪 → 双生共振 → 断代史报告`，全程经 `js/store.js`（localStorage）联动，刷新不丢失。
 
-## 项目结构
+## 工程化
 
-```
-/
-├── index.html              # 入口
-├── js/                     # 源码（engines + modules + utils）
-├── css/                    # 样式
-├── tests/                  # 单元测试（Vitest）
-├── scripts/                # 构建脚本
-├── docs/                   # PRD 与技术文档
-│   ├── life-trajectory-prd/
-│   └── lta-tech-doc/
-├── 星衍LifeVerse-standalone.html  # 离线单文件版
-└── package.json
-```
+- **测试**：Vitest + jsdom，覆盖 5 个引擎模块 + 工具层
+- **构建**：Vite（HMR + 生产构建）+ 零依赖 standalone 打包
+- **规范**：ESLint Flat Config + Prettier + Husky pre-commit
+- **架构**：Phase 2 已完成 main.js 拆分（286→41 行）、全局错误边界、store schema 校验
 
-## 已知工程化缺口（v2.2 待办）
+详细优化记录见 [OPTIMIZATION_LOG.md](OPTIMIZATION_LOG.md)。
 
-1. 阻尼能量损耗：原型仅视觉/日志层反弹，已通过 `starmap.js` 的 `nextImpact *= (1 - resistance*0.6)` 修复真实衰减。
-2. 规则库：`SAMPLE_RULES` 为内联常量，生产化需改为查表 + 触发模糊匹配 + 置信度加权（200→2000 条）。
-3. 多端：当前为桌面优先，已含移动端基础响应式，触屏拖拽事件已预留 `touches` 分支。
+## 已知工程化缺口（待办）
+
+1. XSS 防护：report.js / starmapView.js 的 innerHTML 拼接需改为 DOM API
+2. CI/CD：无 GitHub Actions 自动化流水线
+3. 性能：背景动画未做 visibility 暂停、模块未懒加载
+4. 可访问性：缺少 ARIA 标签和 :focus-visible 样式
+
+完整待办清单见 [OPTIMIZATION_LOG.md](OPTIMIZATION_LOG.md) 未优化项详情。
 
 ## 许可与版权
 

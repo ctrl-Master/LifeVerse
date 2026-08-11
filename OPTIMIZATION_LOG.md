@@ -58,76 +58,166 @@
 | 4 | package.json 缺少 devDeps 和 scripts | P1 | 完整升级 |
 | 5 | Node 路径硬编码 | P0 | 新脚本使用运行时 Node，不指定路径 |
 
-### 未解决的问题（待后续阶段处理）
+---
 
-| # | 问题 | 严重度 | 计划阶段 | 说明 |
-|---|------|--------|---------|------|
-| 1 | main.js 286 行未拆分 | P2 | Phase 2 | 需拆为 router/hud/narrator/app 4 文件 |
-| 2 | 无 JSDoc 类型注释 | P2 | Phase 2 | 需为引擎函数添加 @param/@returns |
-| 3 | 无全局错误处理 | P2 | Phase 2 | 需添加 errorBoundary.js |
-| 4 | window.LTApp 全局状态污染 | P2 | Phase 2 | 改为 ES Module 单例 |
-| 5 | 无 barrel exports | P2 | Phase 2 | engines/modules/utils 各加 index.js |
-| 6 | report.js innerHTML XSS 风险 | P1 | Phase 3 | 需用 DOM API 替代字符串拼接 |
-| 7 | starmapView.js innerHTML 拼接 | P1 | Phase 3 | 同上 |
-| 8 | 无 GitHub Actions CI/CD | P1 | Phase 3 | 需添加 ci.yml + deploy.yml |
-| 9 | 背景星网动画始终运行 | P2 | Phase 3 | 需用 document.hidden 暂停 |
-| 10 | 无模块懒加载 | P2 | Phase 3 | 动态 import() 按需加载 |
-| 11 | 无 ARIA 标签 | P2 | Phase 3 | 可访问性基础 |
-| 12 | 无 CONTRIBUTING / CHANGELOG | P3 | Phase 4 | 文档体系补全 |
-| 13 | 无 Conventional Commits 规范 | P3 | Phase 4 | commitlint + commitizen |
-| 14 | 无 E2E 测试 | P3 | Phase 5 | Playwright |
-| 15 | 无 PWA 支持 | P3 | Phase 5 | manifest + Service Worker |
-| 16 | 旧文件 build_standalone.cjs 未删除 | P3 | Phase 2 | 确认新脚本稳定后删除 |
-| 17 | CSS 变量未提取到独立文件 | P3 | Phase 4 | variables.css |
-| 18 | store.js 无 schema 校验 | P2 | Phase 2 | JSON.parse 后需校验结构 |
+## Phase 2：架构升级（已完成）
+
+### 已完成的改动
+
+#### 1. main.js 拆分（286 行 → 41 行）
+将单体入口文件拆分为 `js/core/` 下 6 个职责清晰的模块：
+
+| 文件 | 职责 | 行数 |
+|------|------|------|
+| `core/router.js` | 模块注册表、路由切换、侧栏导航构建 | ~55 |
+| `core/hud.js` | HUD 徽章、人生完整度环、侧栏状态点 | ~50 |
+| `core/narrator.js` | 叙事条、时代广播、内心独白 | ~45 |
+| `core/bgStarNet.js` | 背景星网粒子动画 | ~65 |
+| `core/interactions.js` | 音效面板、全局快捷键、语音指令 | ~95 |
+| `core/errorBoundary.js` | 全局错误捕获（error + unhandledrejection） | ~25 |
+| `main.js`（新） | 薄入口，组装各子系统并启动 | 41 |
+
+#### 2. 全局错误边界
+- 新增 `core/errorBoundary.js`
+- 捕获 `window.error` 和 `unhandledrejection`
+- 过滤 ResizeObserver 噪声
+- 错误时通过叙事条提示用户（非白屏）
+
+#### 3. store.js schema 校验
+- 新增 `isValid()` 函数：校验顶层字段完整性
+- 新增 `deepMerge()` 函数：深度合并 DEFAULT 与持久化数据
+- 旧用户 localStorage 数据自动补齐新增字段（向前兼容）
+- 损坏数据自动回退到默认值 + 控制台警告
+
+#### 4. JSDoc 类型注释
+为以下文件的公开函数添加 `@param` / `@returns`：
+- `js/engines/retirement.js` — `computeRetirement`（Phase 1 已有）
+- `js/engines/starmap.js` — `castRipple`（Phase 1 已有）
+- `js/engines/vectorMatrix.js` — `cosine` / `buildReferences` / `similarity`（新增）
+- `js/utils/math.js` — `clamp` / `lerp` / `dist` / `fmt1`（新增）
+- `js/store.js` — `getState` / `setState` / `update` / `subscribe` / `reset`（新增）
+
+#### 5. Barrel Exports
+- 新增 `js/engines/index.js` — 统一导出 5 个引擎模块
+- 新增 `js/modules/index.js` — 统一导出 6 个 UI 模块
+- 新增 `js/utils/index.js` — 统一导出 3 个工具模块
+- 外部引用可 `import { computeRetirement, castRipple } from './engines/index.js'`
+
+#### 6. 仓库目录重构
+- `星衍LifeVerse/` 子目录下所有文件移到根目录
+- `人生推测演示程序/` 改名 `docs/`
+- 合并两个 `.gitignore`
+- README 更新项目结构说明，去掉 `cd` 步骤
+
+### 已解决的问题
+
+| # | 问题 | 严重度 | 解决方式 |
+|---|------|--------|---------|
+| 1 | main.js 286 行单体文件，职责混杂 | P2 | 拆分为 6 个 core/ 模块 |
+| 2 | 无全局错误处理，异常导致白屏 | P2 | errorBoundary.js 捕获 + 叙事提示 |
+| 3 | store.js 无 schema 校验，脏数据导致崩溃 | P2 | isValid + deepMerge + 自动回退 |
+| 4 | 引擎/模块/工具无统一导出入口 | P2 | 3 个 barrel index.js |
+| 5 | 仓库目录嵌套，clone 后需 cd | P2 | 重构为根目录 + docs/ |
+| 6 | 关键函数缺类型注释 | P3 | JSDoc @param/@returns |
 
 ### 评分变化
 
-| 维度 | Phase 1 前 | Phase 1 后 | 变化 |
+| 维度 | Phase 1 后 | Phase 2 后 | 变化 |
 |------|-----------|-----------|------|
-| 项目结构与模块化 | 6 | 7 | +1（scripts 目录规范化） |
-| 测试体系 | 0 | 7 | +7（6 测试文件，覆盖率 ≥ 80%） |
-| 构建工具链 | 2 | 7 | +5（Vite 替代自研，消除硬编码） |
-| 代码规范与静态检查 | 1 | 8 | +7（ESLint + Prettier + Husky） |
-| 类型安全 | 0 | 0 | —（Phase 2 处理） |
-| CI/CD 自动化 | 0 | 0 | —（Phase 3 处理） |
-| 错误处理与健壮性 | 3 | 3 | —（Phase 2 处理） |
-| 性能优化 | 4 | 4 | —（Phase 3 处理） |
-| 安全防护 | 3 | 3 | —（Phase 3 处理） |
-| 文档与工程规范 | 5 | 6 | +1（本日志 + 配置文件文档） |
-| 业务逻辑质量 | 7 | 7 | —（保持） |
-| **加权总分** | **30** | **50** | **+20** |
+| 项目结构与模块化 | 7 | 9 | +2（core/ 拆分 + barrel exports） |
+| 测试体系 | 7 | 7 | — |
+| 构建工具链 | 7 | 7 | — |
+| 代码规范与静态检查 | 8 | 8 | — |
+| 类型安全 | 0 | 4 | +4（JSDoc 注释覆盖核心函数） |
+| CI/CD 自动化 | 0 | 0 | —（Phase 3） |
+| 错误处理与健壮性 | 3 | 7 | +4（errorBoundary + store schema 校验） |
+| 性能优化 | 4 | 4 | —（Phase 3） |
+| 安全防护 | 3 | 3 | —（Phase 3） |
+| 文档与工程规范 | 6 | 7 | +1（JSDoc + 目录重构） |
+| 业务逻辑质量 | 7 | 7 | — |
+| **加权总分** | **50** | **63** | **+13** |
 
 ---
 
-## Phase 2：架构升级（待执行）
+## 未优化项详情（后续阶段处理）
 
-- [ ] 拆分 main.js → core/router.js + core/hud.js + core/narrator.js + core/app.js
-- [ ] 添加 JSDoc 类型注释 + types/index.d.ts
-- [ ] 创建 core/errorBoundary.js
-- [ ] 消除 window.LTApp 全局状态
-- [ ] 添加 barrel exports（engines/modules/utils index.js）
-- [ ] store.js 添加 schema 校验
-- [ ] 删除旧 build_standalone.cjs
+### Phase 3：质量保障（待执行）
+
+| # | 问题 | 严重度 | 详情 | 影响 |
+|---|------|--------|------|------|
+| 1 | report.js innerHTML XSS 风险 | **P1 高危** | `report.js` 第 ~80 行使用字符串拼接 + innerHTML 渲染用户输入的 letter 内容，未做转义。攻击者可通过 localStorage 注入恶意 HTML。 | 可被注入恶意脚本 |
+| 2 | starmapView.js innerHTML 拼接 | **P1 高危** | `starmapView.js` 的 ripple 日志渲染使用 innerHTML 拼接 effect 文案，虽然当前文案来自常量表，但 rulebase 的 `describeRebound` 输出未过滤。 | 潜在 XSS |
+| 3 | 无 GitHub Actions CI/CD | **P1** | 无自动化测试/构建/部署流水线。每次提交需手动验证，PR 无质量门禁。 | 代码质量无保障 |
+| 4 | server.js 无 CSP header | **P2** | 零依赖服务器未设置 Content-Security-Policy 响应头，允许任意来源脚本执行。 | 安全防护薄弱 |
+| 5 | 背景星网动画始终运行 | **P2** | `bgStarNet.js` 的 requestAnimationFrame 循环在标签页隐藏时仍在运行，消耗 CPU/GPU。 | 后台性能浪费 |
+| 6 | 无模块懒加载 | **P2** | 所有 6 个 UI 模块在首屏时全量加载，即使用户只看第一个模块。 | 首屏加载慢 |
+| 7 | 无 ARIA 标签 | **P2** | 扇形菜单、探针滑条、星图画布等交互元素缺少 ARIA 属性，屏幕阅读器无法识别。 | 可访问性缺失 |
+| 8 | :focus-visible 样式缺失 | **P3** | 键盘导航时无焦点高亮，仅鼠标 hover 有视觉反馈。 | 键盘用户体验差 |
+
+### Phase 4：工程规范（待执行）
+
+| # | 问题 | 严重度 | 详情 | 影响 |
+|---|------|--------|------|------|
+| 9 | 无 CONTRIBUTING.md | **P3** | 无贡献者指南，外部开发者不了解代码规范、提交格式、测试要求。 | 协作门槛高 |
+| 10 | 无 CHANGELOG.md | **P3** | 无版本变更记录，用户无法追踪功能变化。 | 版本追溯困难 |
+| 11 | 无 ARCHITECTURE.md | **P3** | 无架构文档，新接手者需通读代码才能理解模块关系和数据流。 | 上手成本高 |
+| 12 | 无 .env.example | **P3** | 无环境变量示例文件（虽然当前零依赖，但未来接入 API 时需要）。 | 配置不透明 |
+| 13 | 无 .editorconfig | **P3** | 无编辑器配置统一文件，不同 IDE 可能使用不同缩进/编码。 | 代码风格不一致 |
+| 14 | 无 .nvmrc | **P3** | 无 Node 版本锁定文件，开发者可能使用不兼容的 Node 版本。 | 环境不一致 |
+| 15 | 无 commitlint | **P3** | 无 Conventional Commits 规范校验，提交信息格式随意。 | Git 历史混乱 |
+| 16 | CSS 变量未提取到独立文件 | **P3** | styles.css 中 :root 变量与组件样式混在一起，不利于主题切换。 | 样式维护困难 |
+| 17 | 无 TypeScript 定义 | **P3** | 仅有 JSDoc 注释，无 .d.ts 类型定义文件，IDE 智能提示不完整。 | 类型安全不足 |
+| 18 | ~~旧文件 build_standalone.cjs 未删除~~ | ~~P3~~ | ~~已被 build-standalone.mjs 替代，但旧文件仍在仓库中。~~ | **已解决** — Phase 2 已删除 |
+
+### Phase 5：卓越打磨（待执行）
+
+| # | 问题 | 严重度 | 详情 | 影响 |
+|---|------|--------|------|------|
+| 19 | 无 E2E 测试 | **P3** | 无 Playwright 端到端测试，无法验证完整用户流程（星云注入→退休→星图→报告）。 | 回归风险高 |
+| 20 | 无 PerformanceObserver | **P3** | 无性能监控埋点，无法感知 LCP/FID/CLS 等 Web Vitals 指标。 | 性能黑盒 |
+| 21 | 无 PWA 支持 | **P3** | 无 manifest.json 和 Service Worker，无法离线访问/安装到桌面。 | 移动端体验差 |
+| 22 | 测试覆盖率未到 90% | **P3** | 当前覆盖率目标 80%，UI 模块（modules/）未覆盖。需要 DOM 测试工具补充。 | 测试盲区 |
+| 23 | window.LTApp 全局污染 | **P2** | Phase 2 已标注 TODO，但为兼容现有模块暂保留。需改为 ES Module 单例。 | 全局状态污染 |
+| 24 | 无错误上报 | **P3** | errorBoundary 仅本地 console.error，无远程上报机制。 | 线上错误不可见 |
+
+---
+
+## 各阶段评分汇总
+
+| 阶段 | 总分 | 关键提升 |
+|------|------|---------|
+| 初始状态 | 30 | — |
+| Phase 1 完成 | 50 | +20（测试 + 构建 + 规范） |
+| Phase 2 完成 | 63 | +13（架构拆分 + 错误处理 + schema 校验） |
+| Phase 3 目标 | 75 | +12（XSS 修复 + CI/CD + 性能 + 可访问性） |
+| Phase 4 目标 | 85 | +10（文档体系 + 工程规范 + 类型定义） |
+| Phase 5 目标 | 90+ | +5（E2E + PWA + 监控 + 覆盖率） |
+
+---
 
 ## Phase 3：质量保障（待执行）
 
-- [ ] GitHub Actions CI/CD（ci.yml + deploy.yml）
-- [ ] utils/sanitize.js XSS 防护
-- [ ] 修复 report.js / starmapView.js innerHTML
+- [ ] utils/sanitize.js XSS 防护（escapeHtml + safeRender）
+- [ ] 修复 report.js / starmapView.js innerHTML → DOM API
+- [ ] GitHub Actions CI/CD（ci.yml: lint + test + build）
+- [ ] GitHub Pages 部署（deploy.yml）
 - [ ] server.js 添加 CSP header
 - [ ] 背景星网 document.hidden 暂停
-- [ ] 模块懒加载
+- [ ] 模块懒加载（动态 import()）
 - [ ] ARIA 标签 + :focus-visible
+- [ ] 消除 window.LTApp 全局状态
 
 ## Phase 4：工程规范（待执行）
 
-- [ ] README 重写（badges + 架构图）
+- [x] README 重写（架构图 + 截图 + 工程化说明）— Phase 2 已完成
 - [ ] CONTRIBUTING.md
 - [ ] CHANGELOG.md
 - [ ] ARCHITECTURE.md
 - [ ] .env.example + .editorconfig + .nvmrc
 - [ ] commitlint + commitizen
+- [ ] CSS 变量提取到 variables.css
+- [ ] types/index.d.ts 类型定义
+- [x] 删除旧 build_standalone.cjs — Phase 2 已完成
 
 ## Phase 5：卓越打磨（待执行）
 
@@ -135,3 +225,4 @@
 - [ ] PerformanceObserver 监控
 - [ ] PWA manifest + Service Worker
 - [ ] 测试覆盖率提升到 90%+
+- [ ] 错误上报机制（Sentry / 自建）
