@@ -5,7 +5,6 @@
 ## 快速开始
 
 ```bash
-cd 星衍LifeVerse
 npm start
 # 或： node server.js
 ```
@@ -40,6 +39,22 @@ npm start
 ## 数据流
 
 `星云注入 → 退休预填 → 星图涟漪 → 双生共振 → 断代史报告`，全程经 `js/store.js`（localStorage）联动，刷新不丢失。
+
+## 项目结构
+
+```
+/
+├── index.html              # 入口
+├── js/                     # 源码（engines + modules + utils）
+├── css/                    # 样式
+├── tests/                  # 单元测试（Vitest）
+├── scripts/                # 构建脚本
+├── docs/                   # PRD 与技术文档
+│   ├── life-trajectory-prd/
+│   └── lta-tech-doc/
+├── 星衍LifeVerse-standalone.html  # 离线单文件版
+└── package.json
+```
 
 ## 已知工程化缺口（v2.2 待办）
 
