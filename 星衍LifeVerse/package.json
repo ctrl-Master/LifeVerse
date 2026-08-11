@@ -1,10 +1,40 @@
 {
   "name": "xingyan-lifeverse",
-  "version": "2.1.0",
-  "description": "星衍 LifeVerse · 人生轨迹推演空间（纯前端可运行 MVP，原生 Vanilla + ES Module）",
+  "version": "3.0.0",
+  "description": "星衍 LifeVerse · 人生轨迹推演空间（纯前端，原生 Vanilla + ES Module）",
   "type": "module",
-  "scripts": {
-    "start": "node server.js"
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "private": true
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:standalone": "node scripts/build-standalone.mjs",
+    "preview": "vite preview",
+    "serve": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint js/ tests/",
+    "lint:fix": "eslint js/ tests/ --fix",
+    "format": "prettier --write \"js/**/*.{js,css}\" \"tests/**/*.js\" \"*.{js,json}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.3.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "jsdom": "^24.0.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs}": ["eslint --fix", "prettier --write"],
+    "*.{css,json}": ["prettier --write"]
+  }
 }
