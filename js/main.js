@@ -8,17 +8,13 @@ import { initAudioPanel, initShortcuts, initVoice } from './core/interactions.js
 import { installErrorHandler } from './core/errorBoundary.js';
 import { Sound } from './engines/audio.js';
 import { reset, subscribe } from './store.js';
+import { LTApp } from './core/app.js';
 
-// 全局应用句柄（模块通过 window.LTApp 注册能力，向后兼容）
-// TODO Phase 3：改为 ES Module 单例，消除全局污染
-const LTApp = {
-  route,
-  narrate,
-  reset,
-  Sound,
-  starmapRipple: null  // 由星图模块挂载时注册
-};
-window.LTApp = LTApp;
+// 应用单例（core/app.js 导出，供各模块 import，不再挂载到 window）
+LTApp.route = route;
+LTApp.narrate = narrate;
+LTApp.reset = reset;
+LTApp.Sound = Sound;
 
 // —— 启动序列 ——
 installErrorHandler({ onNarrate: narrate });

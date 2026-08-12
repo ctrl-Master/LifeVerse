@@ -14,6 +14,8 @@ export function initBgStarNet(canvas) {
   const COUNT = window.innerWidth < 768 ? 40 : 90;
   const LINK_DIST = 130;
   const mouse = { x: -9999, y: -9999 };
+  let rafId = null;
+  let running = false;
 
   function resize() {
     W = window.innerWidth; H = window.innerHeight;
@@ -55,8 +57,26 @@ export function initBgStarNet(canvas) {
         }
       }
     }
-    requestAnimationFrame(step);
+    if (running) rafId = requestAnimationFrame(step);
   }
+
+  function start() {
+    if (running || reduced) return;
+    running = true;
+    rafId = requestAnimationFrame(step);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  // 标签页隐藏时暂停动画，节省 CPU / GPU
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
 
   window.addEventListener('resize', () => { resize(); init(); });
   window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
@@ -64,5 +84,7 @@ export function initBgStarNet(canvas) {
   resize(); init();
   if (reduced) {
     for (const p of particles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(79,70,229,0.25)'; ctx.fill(); }
-  } else requestAnimationFrame(step);
+  } else {
+    start();
+  }
 }

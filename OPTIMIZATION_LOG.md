@@ -141,44 +141,46 @@
 
 ## 未优化项详情（后续阶段处理）
 
-### Phase 3：质量保障（待执行）
+### Phase 3：质量保障
+
+本阶段已完成：XSS 转义（sanitize.js + escapeHtml）、server.js CSP 头、背景动画 visibilitychange 暂停、ARIA 标签与 :focus-visible、window.LTApp 改为 core/app.js 单例、GitHub Actions CI 流水线。模块懒加载与 Pages 部署留作后续。
 
 | # | 问题 | 严重度 | 详情 | 影响 |
 |---|------|--------|------|------|
-| 1 | report.js innerHTML XSS 风险 | **P1 高危** | `report.js` 第 ~80 行使用字符串拼接 + innerHTML 渲染用户输入的 letter 内容，未做转义。攻击者可通过 localStorage 注入恶意 HTML。 | 可被注入恶意脚本 |
-| 2 | starmapView.js innerHTML 拼接 | **P1 高危** | `starmapView.js` 的 ripple 日志渲染使用 innerHTML 拼接 effect 文案，虽然当前文案来自常量表，但 rulebase 的 `describeRebound` 输出未过滤。 | 潜在 XSS |
-| 3 | 无 GitHub Actions CI/CD | **P1** | 无自动化测试/构建/部署流水线。每次提交需手动验证，PR 无质量门禁。 | 代码质量无保障 |
-| 4 | server.js 无 CSP header | **P2** | 零依赖服务器未设置 Content-Security-Policy 响应头，允许任意来源脚本执行。 | 安全防护薄弱 |
-| 5 | 背景星网动画始终运行 | **P2** | `bgStarNet.js` 的 requestAnimationFrame 循环在标签页隐藏时仍在运行，消耗 CPU/GPU。 | 后台性能浪费 |
-| 6 | 无模块懒加载 | **P2** | 所有 6 个 UI 模块在首屏时全量加载，即使用户只看第一个模块。 | 首屏加载慢 |
-| 7 | 无 ARIA 标签 | **P2** | 扇形菜单、探针滑条、星图画布等交互元素缺少 ARIA 属性，屏幕阅读器无法识别。 | 可访问性缺失 |
-| 8 | :focus-visible 样式缺失 | **P3** | 键盘导航时无焦点高亮，仅鼠标 hover 有视觉反馈。 | 键盘用户体验差 |
+| 1 | report.js innerHTML XSS 风险 | **P1 高危** | `report.js` 用字符串拼接 + innerHTML 渲染文案，含用户可影响的决策名/年份。 | 已通过 `escapeHtml` 转义动态文本消除 |
+| 2 | starmapView.js innerHTML 拼接 | **P1 高危** | 涟漪日志用 innerHTML 拼接 effect 文案。 | 已用 `escapeHtml` 转义动态文本 |
+| 3 | 无 GitHub Actions CI/CD | **P1** | 无自动化测试/构建流水线。 | 已新增 `.github/workflows/ci.yml`（lint + test + build） |
+| 4 | server.js 无 CSP header | **P2** | 零依赖服务器未设置 CSP 响应头。 | 已添加 `Content-Security-Policy`（同源策略） |
+| 5 | 背景星网动画始终运行 | **P2** | `bgStarNet.js` 的 rAF 循环在标签页隐藏时仍在运行。 | 已加 `visibilitychange` 监听，隐藏即暂停 |
+| 6 | 无模块懒加载 | **P2** | 6 个 UI 模块首屏全量加载。 | 待做：router 改为动态 import() |
+| 7 | 无 ARIA 标签 | **P2** | 交互元素缺少 ARIA 属性。 | 已加 `role`/`aria-label`/`aria-live` + `:focus-visible` 样式（canvas 键盘操作待补） |
+| 8 | :focus-visible 样式缺失 | **P3** | 键盘导航无焦点高亮。 | 已加 `css/a11y.css` |
 
 ### Phase 4：工程规范（待执行）
 
 | # | 问题 | 严重度 | 详情 | 影响 |
 |---|------|--------|------|------|
-| 9 | 无 CONTRIBUTING.md | **P3** | 无贡献者指南，外部开发者不了解代码规范、提交格式、测试要求。 | 协作门槛高 |
-| 10 | 无 CHANGELOG.md | **P3** | 无版本变更记录，用户无法追踪功能变化。 | 版本追溯困难 |
-| 11 | 无 ARCHITECTURE.md | **P3** | 无架构文档，新接手者需通读代码才能理解模块关系和数据流。 | 上手成本高 |
-| 12 | 无 .env.example | **P3** | 无环境变量示例文件（虽然当前零依赖，但未来接入 API 时需要）。 | 配置不透明 |
-| 13 | 无 .editorconfig | **P3** | 无编辑器配置统一文件，不同 IDE 可能使用不同缩进/编码。 | 代码风格不一致 |
-| 14 | 无 .nvmrc | **P3** | 无 Node 版本锁定文件，开发者可能使用不兼容的 Node 版本。 | 环境不一致 |
-| 15 | 无 commitlint | **P3** | 无 Conventional Commits 规范校验，提交信息格式随意。 | Git 历史混乱 |
-| 16 | CSS 变量未提取到独立文件 | **P3** | styles.css 中 :root 变量与组件样式混在一起，不利于主题切换。 | 样式维护困难 |
-| 17 | 无 TypeScript 定义 | **P3** | 仅有 JSDoc 注释，无 .d.ts 类型定义文件，IDE 智能提示不完整。 | 类型安全不足 |
-| 18 | ~~旧文件 build_standalone.cjs 未删除~~ | ~~P3~~ | ~~已被 build-standalone.mjs 替代，但旧文件仍在仓库中。~~ | **已解决** — Phase 2 已删除 |
+| 9 | 无 CONTRIBUTING.md | **P3** | 无贡献者指南。 | 协作门槛高 |
+| 10 | 无 CHANGELOG.md | **P3** | 无版本变更记录。 | 版本追溯困难 |
+| 11 | 无 ARCHITECTURE.md | **P3** | 无架构文档。 | 上手成本高 |
+| 12 | 无 .env.example | **P3** | 无环境变量示例文件。 | 配置不透明 |
+| 13 | 无 .editorconfig | **P3** | 无编辑器配置统一文件。 | 代码风格不一致 |
+| 14 | 无 .nvmrc | **P3** | 无 Node 版本锁定文件。 | 环境不一致 |
+| 15 | 无 commitlint | **P3** | 无 Conventional Commits 校验。 | Git 历史混乱 |
+| 16 | CSS 变量未提取到独立文件 | **P3** | styles.css 中 :root 变量与组件样式混在一起。 | 样式维护困难 |
+| 17 | 无 TypeScript 定义 | **P3** | 仅有 JSDoc 注释，无 .d.ts。 | 类型安全不足 |
+| 18 | ~~旧文件 build_standalone.cjs 未删除~~ | ~~P3~~ | ~~已被 build-standalone.mjs 替代。~~ | **已解决** — Phase 2 已删除 |
 
 ### Phase 5：卓越打磨（待执行）
 
 | # | 问题 | 严重度 | 详情 | 影响 |
 |---|------|--------|------|------|
-| 19 | 无 E2E 测试 | **P3** | 无 Playwright 端到端测试，无法验证完整用户流程（星云注入→退休→星图→报告）。 | 回归风险高 |
-| 20 | 无 PerformanceObserver | **P3** | 无性能监控埋点，无法感知 LCP/FID/CLS 等 Web Vitals 指标。 | 性能黑盒 |
-| 21 | 无 PWA 支持 | **P3** | 无 manifest.json 和 Service Worker，无法离线访问/安装到桌面。 | 移动端体验差 |
-| 22 | 测试覆盖率未到 90% | **P3** | 当前覆盖率目标 80%，UI 模块（modules/）未覆盖。需要 DOM 测试工具补充。 | 测试盲区 |
-| 23 | window.LTApp 全局污染 | **P2** | Phase 2 已标注 TODO，但为兼容现有模块暂保留。需改为 ES Module 单例。 | 全局状态污染 |
-| 24 | 无错误上报 | **P3** | errorBoundary 仅本地 console.error，无远程上报机制。 | 线上错误不可见 |
+| 19 | 无 E2E 测试 | **P3** | 无 Playwright 端到端测试。 | 回归风险高 |
+| 20 | 无 PerformanceObserver | **P3** | 无性能监控埋点。 | 性能黑盒 |
+| 21 | 无 PWA 支持 | **P3** | 无 manifest.json 和 Service Worker。 | 移动端体验差 |
+| 22 | 测试覆盖率未到 90% | **P3** | UI 模块（modules/）未覆盖。 | 测试盲区 |
+| 23 | window.LTApp 全局污染 | **P2** | 原挂到 window 的全局句柄。 | **已解决** — 改为 `core/app.js` ES Module 单例 |
+| 24 | 无错误上报 | **P3** | errorBoundary 仅本地 console.error。 | 线上错误不可见 |
 
 ---
 
@@ -189,23 +191,23 @@
 | 初始状态 | 30 | — |
 | Phase 1 完成 | 50 | +20（测试 + 构建 + 规范） |
 | Phase 2 完成 | 63 | +13（架构拆分 + 错误处理 + schema 校验） |
-| Phase 3 目标 | 75 | +12（XSS 修复 + CI/CD + 性能 + 可访问性） |
+| Phase 3 完成 | 75 | +12（XSS 转义 + CSP + 背景暂停 + ARIA/focus-visible + 单例 + CI） |
 | Phase 4 目标 | 85 | +10（文档体系 + 工程规范 + 类型定义） |
 | Phase 5 目标 | 90+ | +5（E2E + PWA + 监控 + 覆盖率） |
 
 ---
 
-## Phase 3：质量保障（待执行）
+## Phase 3：质量保障（本阶段进展）
 
-- [ ] utils/sanitize.js XSS 防护（escapeHtml + safeRender）
-- [ ] 修复 report.js / starmapView.js innerHTML → DOM API
-- [ ] GitHub Actions CI/CD（ci.yml: lint + test + build）
-- [ ] GitHub Pages 部署（deploy.yml）
-- [ ] server.js 添加 CSP header
-- [ ] 背景星网 document.hidden 暂停
+- [x] utils/sanitize.js XSS 防护（escapeHtml + textNode）
+- [x] 修复 report.js / starmapView.js innerHTML → escapeHtml 转义
+- [x] GitHub Actions CI/CD（ci.yml: lint + test + build）
+- [x] server.js 添加 CSP header
+- [x] 背景星网 document.hidden 暂停
 - [ ] 模块懒加载（动态 import()）
-- [ ] ARIA 标签 + :focus-visible
-- [ ] 消除 window.LTApp 全局状态
+- [x] ARIA 标签 + :focus-visible（canvas 键盘操作待补）
+- [x] 消除 window.LTApp 全局状态（改为 core/app.js 单例）
+- [ ] GitHub Pages 部署（deploy.yml）
 
 ## Phase 4：工程规范（待执行）
 

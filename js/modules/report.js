@@ -4,6 +4,8 @@ import { el } from '../utils/dom.js';
 import { getState, update } from '../store.js';
 import { NODES, LINKS, nodeById, castRipple } from '../engines/starmap.js';
 import { buildReferences } from '../engines/vectorMatrix.js';
+import { escapeHtml } from '../utils/sanitize.js';
+import { LTApp } from '../core/app.js';
 
 // ===== 可视化生成（纯 SVG，零新依赖） =====
 function radarSVG(vals, labels) {
@@ -24,7 +26,7 @@ function radarSVG(vals, labels) {
     const ex = cx + R * Math.cos(a), ey = cy + R * Math.sin(a);
     axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + ex.toFixed(1) + '" y2="' + ey.toFixed(1) + '" stroke="#e7e9f2"/>';
     const lx = cx + (R + 18) * Math.cos(a), ly = cy + (R + 18) * Math.sin(a);
-    labs += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6b7280">' + labels[i] + '</text>';
+    labs += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6b7280">' + escapeHtml(labels[i]) + '</text>';
     const vx = cx + R * (vals[i] / 100) * Math.cos(a), vy = cy + R * (vals[i] / 100) * Math.sin(a);
     proj.push([vx, vy]);
     dots += '<circle cx="' + vx.toFixed(1) + '" cy="' + vy.toFixed(1) + '" r="3" fill="#4f46e5"/>';
@@ -79,8 +81,8 @@ function rippleSVG(lr) {
     else if (conflict.has(nd.id)) col = '#e11d48';
     else if (affected.has(nd.id)) col = '#0ea5e9';
     const r = nd.id === 'me' ? 10 : (affected.has(nd.id) ? 8 : 6);
-    dots += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + r + '" fill="' + col + '"><title>' + nd.label + '</title></circle>';
-    dots += '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + r + 11) + '" text-anchor="middle" font-size="10" fill="#475069">' + nd.label + '</text>';
+    dots += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + r + '" fill="' + col + '"><title>' + escapeHtml(nd.label) + '</title></circle>';
+    dots += '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + r + 11) + '" text-anchor="middle" font-size="10" fill="#475069">' + escapeHtml(nd.label) + '</text>';
   });
   return '<svg viewBox="0 0 360 320" class="rv-svg" style="max-width:440px;margin:0 auto">' + lines + dots + '</svg>';
 }
@@ -89,7 +91,7 @@ function twinBars(tp) {
   if (!tp || !tp.length) return '<p class="muted">（尚未生成，请前往「双生时空剪影」调节结构向量）</p>';
   return '<div class="twin-bars">' + tp.map(d => {
     const v = Math.round(d.sim * 100);
-    return '<div class="tb-row"><span>' + d.name + '</span><div class="tb-track"><div class="tb-fill" style="width:' + v + '%"></div></div><span class="tb-val">' + v + '%</span></div>';
+    return '<div class="tb-row"><span>' + escapeHtml(d.name) + '</span><div class="tb-track"><div class="tb-fill" style="width:' + v + '%"></div></div><span class="tb-val">' + v + '%</span></div>';
   }).join('') + '</div>';
 }
 
@@ -99,11 +101,11 @@ export const report = {
   subtitle: '汇总星云注入、退休时钟、星图涟漪、双生共振，生成一页可打印的「人生断代史」可视化档案',
   mount(root) {
     const st = getState();
-    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const narrate = (t) => { if (LTApp) LTApp.narrate(t); };
     const jumpStarmap = () => {
-      window.LTApp.route('starmap');
+      LTApp.route('starmap');
       narrate('报告 → 跳转星图，重演关系涟漪。');
-      setTimeout(() => { if (window.LTApp.starmapRipple) window.LTApp.starmapRipple(); }, 30);
+      setTimeout(() => { if (LTApp.starmapRipple) LTApp.starmapRipple(); }, 30);
     };
     const sec = (id, title, bodyNode) => el('section', { class: 'report-sec', id: id }, [
       el('h3', { text: title }), bodyNode
@@ -140,7 +142,7 @@ export const report = {
     const rippleWrap = el('div', { class: 'rv-ripple', title: '点击重演涟漪' }, [
       el('div', { html: rippleSVG(lr) }),
       el('p', { class: 'rv-cap', text:
-        (lr._sample ? '示例演示 · ' : '触发事件：' + lr.name + '（强度 ' + lr.impact.toFixed(2) + '）· ') +
+        (lr._sample ? '示例 · ' : '触发事件：' + escapeHtml(lr.name) + '（强度 ' + lr.impact.toFixed(2) + '）· ') +
         '点击图区可跳转星图重演' })
     ]);
     rippleWrap.addEventListener('click', jumpStarmap);
@@ -157,7 +159,7 @@ export const report = {
         el('div', { html: twinBars(tp) }),
         el('p', { class: 'rv-cap', text:
           (tpReal && tpReal.length) ? '由「双生时空剪影」滑块实时匹配'
-            : '示例演示 · 调节双生滑块可替换为你的真实匹配' })
+            : '示例 · 调节双生滑块可替换为你的真实匹配' })
       ]));
 
     // 五、衍生指标卡（冲突指数 / 被波及人数 / 最强阻力边）
@@ -173,7 +175,7 @@ export const report = {
         '<div class="rc-card"><div class="rc-k">决策次数</div><div class="rc-v">' + decs.length + '</div></div>' +
         '<div class="rc-card"><div class="rc-k">被波及人数合计</div><div class="rc-v">' + affectedTotal + '</div></div>' +
         '<div class="rc-card"><div class="rc-k">冲突指数</div><div class="rc-v" style="color:var(--echo)">' + conflictIdx + '</div></div>' +
-        '<div class="rc-card"><div class="rc-k">最强阻力边</div><div class="rc-v">' + conflictLabel + '</div></div>' +
+        '<div class="rc-card"><div class="rc-k">最强阻力边</div><div class="rc-v">' + escapeHtml(conflictLabel) + '</div></div>' +
       '</div>';
     const sec5 = sec('s5', '五、推演衍生指标', el('div', { html: metricsHTML }));
 
@@ -182,8 +184,8 @@ export const report = {
       ? decs.slice().reverse().map((d, k) => {
           const reach = (d.results && d.results.length) ? d.results.length : '—';
           return '<li class="chrono-item" data-i="' + (decs.length - 1 - k) + '">' +
-            '<span class="ch-year">' + (d.year || '—') + '</span>' +
-            '<span class="ch-evt">' + d.name + '</span>' +
+            '<span class="ch-year">' + escapeHtml(d.year || '—') + '</span>' +
+            '<span class="ch-evt">' + escapeHtml(d.name) + '</span>' +
             '<span class="ch-reach">波及 ' + reach + '</span>' +
             (d.rebound ? '<span class="ch-flag">反弹</span>' : '<span class="ch-flag ok">顺行</span>') +
             '<button class="ch-hide" title="从导出中隐藏">⊘</button></li>';

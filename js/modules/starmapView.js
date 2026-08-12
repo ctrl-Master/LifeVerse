@@ -11,6 +11,8 @@ import { Sound } from '../engines/audio.js';
 import { NODES, LINKS, DECAY, nodeById, castRipple, SCENES } from '../engines/starmap.js';
 import { describeEffect, describeRebound, lookupRule, RULE_PACKS, DOMAIN_COLORS } from '../engines/rulebase.js';
 import { update, getState, subscribe } from '../store.js';
+import { escapeHtml } from '../utils/sanitize.js';
+import { LTApp } from '../core/app.js';
 
 // 扇形决策菜单项（规格附录 A；ruleId 映射到 rulebase 分域卡包）
 const DECISIONS = [
@@ -60,7 +62,7 @@ export const starmapView = {
     let ripples = [], pulses = [], dragging = null, dragOffset = { x: 0, y: 0 }, moved = false;
     let fanNode = null, lpTimer = null, pressNode = null, downPos = { x: 0, y: 0 }, downEdge = -1, cloneCnt = 0;
     let secretMode = false, secretFirst = null;
-    const narrate = (t) => { if (window.LTApp) window.LTApp.narrate(t); };
+    const narrate = (t) => { if (LTApp) LTApp.narrate(t); };
     const nodes = NODES.map(n => ({ ...n }));
     const links = LINKS.map(l => l.slice());
     // 用 store 中已调整的阻尼覆盖（跨会话保留）
@@ -207,7 +209,7 @@ export const starmapView = {
       const { results } = castRipple(sourceId, baseImpact, links);
       const head = el('div', { class: 'rl-item rl-story' });
       head.innerHTML = '<span class="rl-tag" style="background:var(--accent-light);color:var(--accent)">' + yr + ' 年</span>' +
-        '<strong>' + eventName + '</strong>（影响强度 ' + baseImpact.toFixed(2) + '）';
+        '<strong>' + escapeHtml(eventName) + '</strong>（影响强度 ' + baseImpact.toFixed(2) + '）';
       log.appendChild(head);
       const record = { source: sourceId, name: eventName, impact: baseImpact, ruleId: ruleId || null, results: [], year: yr };
       let frictionCount = 0;
@@ -225,7 +227,7 @@ export const starmapView = {
           }
           const story = r.resistance >= 0.5 ? describeRebound(r.from, r.to, r.impact, r.resistance) : (nodeById2(r.from).label + ' → ' + tn.label + '：' + describeEffect(r.to, r.impact));
           const item = el('div', { class: 'rl-item rl-story' });
-          item.innerHTML = '<span class="rl-tag" style="background:rgba(217,119,6,0.10);color:#d97706">第' + r.depth + '圈</span>' + story + friction;
+          item.innerHTML = '<span class="rl-tag" style="background:rgba(217,119,6,0.10);color:#d97706">第' + r.depth + '圈</span>' + escapeHtml(story) + friction;
           log.appendChild(item);
           log.scrollTop = log.scrollHeight;
           record.results.push(r);
@@ -255,7 +257,7 @@ export const starmapView = {
         const item = el('button', { class: 'fan-item' + (unlocked ? '' : ' fan-locked') });
         item.style.left = (node.x + Math.cos(ang) * R) + 'px';
         item.style.top = (node.y + Math.sin(ang) * R) + 'px';
-        item.innerHTML = '<span class="fi-main">' + d.text + '</span>' +
+        item.innerHTML = '<span class="fi-main">' + escapeHtml(d.text) + '</span>' +
           '<span class="fi-sub">' + (unlocked ? ('预计波及 ' + rule.reach + ' 人 · 摩擦风险 ' + rule.risk) : '需先注入星云解锁') + '</span>';
         item.title = '影响强度 ' + d.impact.toFixed(2);
         if (unlocked) item.addEventListener('click', (e) => { e.stopPropagation(); cast(node.id, d.text, d.impact, d.ruleId); closeFan(); });
@@ -412,11 +414,11 @@ export const starmapView = {
     resize();
     const loop = rafLoop(draw);
     // 注册全局涟漪触发（供快捷键空格 / 语音指令调用）
-    window.LTApp.starmapRipple = () => {
+    LTApp.starmapRipple = () => {
       const src = nodes[1 + Math.floor(Math.random() * (nodes.length - 1))];
       cast(src.id, '全局决策石子', 0.72, null);
     };
     this._dispose = () => { loop.stop(); offResize(); if (lpTimer) clearTimeout(lpTimer); };
   },
-  unmount() { if (this._dispose) this._dispose(); window.LTApp.starmapRipple = null; }
+  unmount() { if (this._dispose) this._dispose(); LTApp.starmapRipple = null; }
 };

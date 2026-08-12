@@ -6,9 +6,10 @@
   <link rel="icon" href="data:," />
   <title>星衍 LifeVerse · 人生轨迹推演空间</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/a11y.css" />
 </head>
 <body>
-  <canvas id="bgStarNet"></canvas>
+  <canvas id="bgStarNet" aria-hidden="true"></canvas>
 
   <header class="topbar">
     <div class="brand">
@@ -21,8 +22,8 @@
       </span>
     </div>
     <div class="topbar-right">
-      <button id="micBtn" class="icon-btn" title="语音指令（说：涟漪 / 宇宙 / 退休 / 重置 / 分屏）">🎙️</button>
-      <button id="soundToggle" class="icon-btn" title="音效设置">🔊</button>
+      <button id="micBtn" class="icon-btn" title="语音指令（说：涟漪 / 宇宙 / 退休 / 重置 / 分屏）" aria-label="语音指令">🎙️</button>
+      <button id="soundToggle" class="icon-btn" title="音效设置" aria-label="音效设置">🔊</button>
       <div id="audioPanel" class="audio-panel" style="display:none">
         <div class="ap-title">音效通道</div>
         <label><input type="checkbox" id="ch_mute"> 全部静音</label>
@@ -34,14 +35,14 @@
     </div>
   </header>
 
-  <div id="narrativeBar" class="narrative-bar">
+  <div id="narrativeBar" class="narrative-bar" aria-live="polite">
     <span class="nar-dot"></span>
     <span id="narrativeText">欢迎来到星衍 LifeVerse · 拖拽星体、滑动探针，用「手势」而非按钮推演你的人生。</span>
   </div>
 
   <div class="layout">
-    <nav id="nav" class="sidenav"></nav>
-    <main id="stage" class="stage"></main>
+    <nav id="nav" class="sidenav" role="navigation" aria-label="模块导航"></nav>
+    <main id="stage" class="stage" role="main" aria-label="模块内容"></main>
   </div>
 
   <div id="voiceTip" class="voice-tip" style="display:none"></div>
